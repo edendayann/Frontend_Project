@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "Post" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT DEFAULT(0),
     "title" TEXT NOT NULL,
     "content" TEXT,
     "published" BOOLEAN NOT NULL DEFAULT false,
@@ -10,7 +10,7 @@ CREATE TABLE "Post" (
 
 -- CreateTable
 CREATE TABLE "accounts" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT DEFAULT(0),
     "user_id" INTEGER NOT NULL,
     "type" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE "accounts" (
 
 -- CreateTable
 CREATE TABLE "sessions" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT DEFAULT(0),
     "session_token" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "expires" DATETIME NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE "sessions" (
 
 -- CreateTable
 CREATE TABLE "users" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT DEFAULT(0),
     "name" TEXT,
     "email" TEXT,
     "email_verified" DATETIME,
