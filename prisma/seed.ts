@@ -26,6 +26,7 @@ function createData(): Prisma.UserCreateInput[] {
           {
             title: 'Prisma on YouTube',
             content: 'https://pris.ly/youtube',
+            published: true,
           },
         ],
       },
