@@ -28,6 +28,7 @@ const Layout: React.FC<Props> = (props) => (
           Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
           "Segoe UI Symbol";
         background: rgb(212, 251, 233);
+        background-image: url('https://img.freepik.com/free-vector/flower-seamless-pattern-background_1217-761.jpg?w=740&t=st=1683105026~exp=1683105626~hmac=9839fc1f9f9270399804001e8efff90d229a3b3d3f1affc61206a013dd8842e4')
       }
 
       input,

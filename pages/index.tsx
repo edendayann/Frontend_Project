@@ -86,7 +86,7 @@ const Blog: React.FC<Props> = (props) => {
       </div>
      <style jsx>{`
   .post {
-    background: rgba(238, 251, 245, 0.864);
+    background: rgba(238, 251, 245, 0.550);
     transition: box-shadow 0.1s ease-in;
   }
   .post:hover {
