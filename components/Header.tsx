@@ -167,7 +167,7 @@ const Header: React.FC = () => {
           }
 
           p {
-            background: rgb(212, 251, 233);
+            background: transparent;
             display: inline-block;
             font-size: 13px;
             padding-right: 1rem;
@@ -175,11 +175,11 @@ const Header: React.FC = () => {
 
           a + a {
             margin-left: 1rem;
-            background: rgb(212, 251, 233);
+            background: transparent;
           }
 
           .right {
-            background: rgb(212, 251, 233);
+            background: transparent;
             margin-left: auto;
           }
 
@@ -190,7 +190,7 @@ const Header: React.FC = () => {
           }
 
           button {
-            background: rgb(212, 251, 233);
+            background: transparent;
             border: none;
           }
         `}</style>

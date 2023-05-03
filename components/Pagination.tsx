@@ -101,7 +101,7 @@ const Pagination: React.FC<Props> = (props) => {
   }
 
   .pagination__item--active {
-    background-color: #0070f3;
+    background-color: gray;
     color: #fff;
     `}</style> </>
   );
