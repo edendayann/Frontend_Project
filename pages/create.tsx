@@ -39,6 +39,7 @@ const Draft: React.FC = () => {
         },
       }).then(result => 
         url = result.data.url)
+        //result => result ? url = result.data.url : url = ''
       .catch(error => console.log(error))
 
       const videoData = new FormData();

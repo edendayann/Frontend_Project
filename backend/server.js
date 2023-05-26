@@ -41,8 +41,7 @@ mongoSchema.set('toJSON', {
       returnedObject.id = returnedObject._id.toString()
       delete returnedObject._id
       delete returnedObject.__v
-    }
-  })
+}})
 
 app.post('/api/upload', parser.single('video'), (req, res) => {
 //   try {
@@ -85,18 +84,19 @@ app.post('/api/uploadMetaData',upload.none(), (req, res) => {
     post.save().then(result => {
         res.json(result);
         console.log("result: "+result.userName+", "+result.date+", "+result.postID+", "+result.videoURL);
-        mongoose.connection.close();
+        //mongoose.connection.close();
     }).catch(err => res.json(err))
 });
 
-app.get('/api/video', (req, res) => {
-    Post.findById(req.body.postID).then(result => {
-        console.log(result.videoURL)
-        res.json(result.videoURL)
-    }).catch(err => res.json("video not found: "+err))
+app.get("/api/video/:postID", async(req, res) => {
+    const postID = req.params.postID;
+    const post = await Post.findOne({postID: postID}).exec();
+    if(!post){
+        res.status(404).json("");
+        return;
+    }
+    res.status(200).json(post);
 })
-
-
 
 // Start the server
 const server = app.listen(3001, () => {
