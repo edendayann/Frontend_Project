@@ -1,37 +1,12 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
 .post {
     background: rgba(238, 251, 245, 0.864);
     transition: box-shadow 0.1s ease-in;
   }
   
-  /* .post {
-    float: center;
-    width: 90%;
-    grid-gap: 20px; 
-    grid-template-columns: 1fr 1fr; 
-    display: inline-block;
-    margin: 1rem;
-    background: rgba(238, 251, 245, 0.864);
-    transition: box-shadow 0.1s ease-in;
-  }
-
-  .post-left {
-    vertical-align: baseline;
-    float: left;
-    width: 47%;
-    height: 10%;
-    margin: 1rem;
-    background: rgba(238, 251, 245, 0.864);
-    transition: box-shadow 0.1s ease-in;
-  }
-  .post-right {
-    vertical-align: baseline;
-    float: right;
-    width: 47%;
-    height: 10%;
-    margin: 1rem;
-    background: rgba(238, 251, 245, 0.864);
-    transition: box-shadow 0.1s ease-in;
-  } */
   .post:hover {
     background-color: #e1fbf2;
     box-shadow: 1px 1px 3px #aaa;

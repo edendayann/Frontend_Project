@@ -72,12 +72,6 @@ const Blog: React.FC<Props> = (props) => {
               <Post post={post} />
             </div>
           ))}
-          {/* {feed.map((post, index, arr) => {
-            if (index % 2 === 0)
-              return <div key={post.id} className="post-left"> <Post post={post} /> </div>
-            else
-              return <div key={post.id} className="post-right"> <Post post={post} /> </div>
-          })} */}
         </main>
         <b><center>{pageCount === 0 ? "No posts available!" : ""}</center></b>
         <div>
