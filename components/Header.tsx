@@ -13,23 +13,20 @@ const Header: React.FC = () => {
   let left = (
     <div className="left">
       <Link href="/" legacyBehavior>
-        <a className="bold" data-active={isActive("/")}>
+        <a className="feed" data-active={isActive("/")}>
           Feed
         </a>
       </Link>
       <style jsx>{`
-        .bold {
-          font-weight: bold;
-        }
-
         a {
           text-decoration: none;
-          color: #000;
+          color: gray;
           display: inline-block;
         }
 
         .left a[data-active="true"] {
-          color: gray;
+          color: black;
+          font-weight: bold;
         }
 
         a + a {
@@ -45,24 +42,22 @@ const Header: React.FC = () => {
     left = (
       <div className="left">
         <Link href="/" legacyBehavior>
-          <a className="bold" data-active={isActive("/")}>
+          <a className="feed" data-active={isActive("/")}>
             Feed
           </a>
         </Link>
         <style jsx>{`
-          .bold {
-            font-weight: bold;
-          }
-
-          a {
+a {
             text-decoration: none;
-            color: #000;
+            color: gray;
             display: inline-block;
           }
 
           .left a[data-active="true"] {
-            color: gray;
+            color: black;
+            font-weight: bold;
           }
+
 
           a + a {
             margin-left: 1rem;
@@ -117,7 +112,7 @@ const Header: React.FC = () => {
     left = (
       <div className="left">
         <Link href="/" legacyBehavior>
-          <a className="bold" data-active={isActive("/")}>
+          <a className="feed" data-active={isActive("/")}>
             Feed
           </a>
         </Link>
@@ -125,18 +120,15 @@ const Header: React.FC = () => {
           <a data-active={isActive("/drafts")}>My drafts</a>
         </Link>
         <style jsx>{`
-          .bold {
-            font-weight: bold;
-          }
-
           a {
             text-decoration: none;
-            color: #000;
+            color: gray;
             display: inline-block;
           }
 
           .left a[data-active="true"] {
-            color: gray;
+            color: black;
+            font-weight: bold;
           }
 
           a + a {
@@ -213,4 +205,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default Header;

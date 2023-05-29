@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import type { GetServerSideProps } from "next";
 import Layout from "../components/Layout";
 import Post, { PostProps } from "../components/Post";
 import prisma from '../lib/prisma'
 import Pagination from "../components/Pagination";
 import { getSession } from "next-auth/react";
+import axios from "axios";
 
 export const getServerSideProps: GetServerSideProps = async ({ query, req }) => {
   const page = parseInt(query.page as string, 10) || 1;
@@ -58,6 +59,21 @@ type Props = {
   page: number;
   pageCount: number;
 };
+// export const todo = (post: PostProps) =>{
+
+  const getVideo = async (post: PostProps, setVideo: React.Dispatch<React.SetStateAction<null>>) =>{
+    try{
+      const result = await axios.get(`http://localhost:3001/api/video/${post.id}`)
+      if(result.data !== "")
+        setVideo(result.data.videoURL)
+    }
+    catch(e){
+      console.error('Error fetching video:',e)
+    }}
+//   return getVideo();
+  
+// }
+
 
 const Blog: React.FC<Props> = (props) => {
   const { feed, page, pageCount } = props;
@@ -67,11 +83,15 @@ const Blog: React.FC<Props> = (props) => {
       <div className="page">
         <h1><center>Public Feed</center></h1>
         <main>
-          {feed.map((post) => (
-            <div key={post.id} className="post">
-              <Post post={post} />
-            </div>
-          ))}
+          {feed.map((post) => {
+            const [video, setVideo] = useState(null);
+            getVideo(post, setVideo)
+            return (
+              <div key={post.id} className="post">
+                <Post post={post} video = {video} />
+              </div>
+            )
+          })}
         </main>
         <b><center>{pageCount === 0 ? "No posts available!" : ""}</center></b>
         <div>
@@ -96,4 +116,4 @@ const Blog: React.FC<Props> = (props) => {
   );
 };
 
-export default Blog;
+export default Blog;

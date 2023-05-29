@@ -1,9 +1,10 @@
-import React, {useRef, useState} from "react";
+import React, {CSSProperties, useEffect, useRef, useState} from "react";
 import Layout from "../components/Layout";
 import Router from "next/router";
 import {useSession} from "next-auth/react";
 import axios from 'axios';
-import { ClipLoader, PropagateLoader } from 'react-spinners';
+import { BarLoader, ClipLoader, PropagateLoader } from 'react-spinners';
+
 
 const Draft: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -11,7 +12,9 @@ const Draft: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [video, setVideo] = useState<File>(); 
   const { data: session, status } = useSession();  
-  const fileInput = useRef<HTMLInputElement>(null);
+
+  const videoInput = useRef<HTMLInputElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);  //MAYA
 
   let email = session?.user?.email;
   
@@ -55,9 +58,7 @@ const Draft: React.FC = () => {
       })
     }
     await Router.push("/drafts");
-  } catch (error) {
-    console.error("errorrrr: "+error);
-  }
+  } catch (error) { console.error(error) }
   setLoading(false)
 
   };
@@ -72,32 +73,39 @@ const Draft: React.FC = () => {
       setVideo(files[0]);
   };
 
-  const handleUpload = async () => {
-    setLoading(true);
-    document.getElementById('videoFile')?.click();
+  // const handleUpload = async () => {
+  //   setLoading(true);
+  //   document.getElementById('videoFile')?.click();
     
-    setLoading(false)
+  //   setLoading(false)
+  // };
+  
+  
+  // const Spinner = () => {  
+  //   return (
+  //     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+  //         <div
+  //           style={{
+  //             display: 'inline-block',
+  //             width: '50px',
+  //             height: '50px',
+  //             border: '3px solid #cccccc',
+  //             borderTopColor: '#ffffff',
+  //             borderRadius: '50%',
+  //             animation: 'spin 1s infinite linear',
+  //           }}
+  //         ></div>
+  //     </div>
+  //   );
+  // };
+  
+  useEffect(() => {titleInputRef.current?.focus()}, [])  //MAYA
+
+  const override: CSSProperties = {
+    display: "block",
+    margin: "10 auto",
+    borderColor: "red",
   };
-  
-  
-  const Spinner = () => {  
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <div
-            style={{
-              display: 'inline-block',
-              width: '50px',
-              height: '50px',
-              border: '3px solid #cccccc',
-              borderTopColor: '#ffffff',
-              borderRadius: '50%',
-              animation: 'spin 1s infinite linear',
-            }}
-          ></div>
-      </div>
-    );
-  };
-  
 
   return (
     <Layout>
@@ -105,7 +113,7 @@ const Draft: React.FC = () => {
         <form onSubmit={submitData}>
           <h1>New Draft</h1>
           <input
-            autoFocus
+            ref={titleInputRef}  //MAYA
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title"
             type="text"
@@ -118,23 +126,17 @@ const Draft: React.FC = () => {
             rows={8}
             value={content}
           />
-          {/* <div>
-            {video ? <p>Selected Video: {video.name}</p> :
-              <button disabled = {loading} onClick={handleUpload}>Upload Video</button>}
-            <input type="file" id="videoFile" name="videoFile" accept="video/*" style={{ display: 'none' }} onChange={handleChange} />
-          </div> */}
-
           <input
             type="file"
             onChange={handleChange}
-            ref={fileInput}
+            ref={videoInput}
           />
           <button
             disabled={!content || !title || loading}  // Disable button when form fields are empty or when the form is being submitted
             onSubmit={submitData}  // Call handleCreateButtonClick when the "Create" button is clicked
           >
             <div>
-              {loading? <PropagateLoader color="black" loading={loading} size={15} /> : 'Create'}
+              {loading? <BarLoader color="black" loading={loading} cssOverride={override} /> : 'Create'}
             </div>
             {/* {loading ? <p><Spinner/></p> : <p>Create</p>} */}
           </button>
@@ -177,4 +179,4 @@ const Draft: React.FC = () => {
   );
 };
 
-export default Draft;
+export default Draft;
