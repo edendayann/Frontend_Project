@@ -1,40 +1,45 @@
+const mongoose = require('mongoose');
+
+const multer = require('multer') // multer for handling file uploads
+const upload = multer({ dest: 'uploads/' });  //sets the destination folder for uploaded files.
+
 const express = require("express");
 const cors = require('cors');
-const multer = require('multer')
-const mongoose = require('mongoose');
 const app = express();
 app.use(cors());
-const upload = multer({ dest: 'uploads/' });
+
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('cloudinary').v2;  // for uploading files to Cloudinary.
 
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: 'dcnbvgpbm',
-  api_key: '765212827232443',
-  api_secret: 'Mm-lfxue0-fIRQFzZw9yIhGKJ8c',
+    cloud_name: 'dcnbvgpbm',
+    api_key: '765212827232443',
+    api_secret: 'Mm-lfxue0-fIRQFzZw9yIhGKJ8c',
 });
-
+// CloudinaryStorage instance for handling file uploads to Cloudinary:
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         resource_type: 'video',
     },
 });
+// Create multer instance with a disk storage configuration
 const parser = multer({
     storage: multer.diskStorage({}),
 });
-
+// Defines the MongoDB connection URL and establishes a connection using Mongoose
 const mongoURL = `mongodb+srv://hazaniz:zohar112@cluster0.1s9hgkt.mongodb.net/?retryWrites=true&w=majority`;
-mongoose.set('strictQuery',false)
+mongoose.set('strictQuery', false)
 mongoose.connect(mongoURL)
-
+// Defines a Mongoose schema for the Post model
 const mongoSchema = new mongoose.Schema({
     userName: String,
     date: String,
     postID: String,
     videoURL: String,
 })
+// Creates a Mongoose model named Post based on the defined schema
 const Post = mongoose.model('Post', mongoSchema)
 mongoSchema.set('toJSON', {
     transform: (document, returnedObject) => {
@@ -43,37 +48,23 @@ mongoSchema.set('toJSON', {
       delete returnedObject.__v
 }})
 
+// Route for handling file uploads to Cloudinary
 app.post('/api/upload', parser.single('video'), (req, res) => {
-//   try {
-//     if (!req.video) {
-//       res.status(400).json({ message: 'No video file provided' });
-//       return;
-//     }
-//     const result = async () => await cloudinary.v2.uploader.upload(req.file.path, { resource_type: 'video' });
-//     res.json({ public_id: result.public_id, url: result.secure_url });
-//     res.header("Access-Control-Allow-Origin", "*");
-
-//   } catch (error) {
-//     console.error('Error uploading video:', error);
-//     res.status(500).json({ message: 'Video upload failed' });
-//   }
-
-const result = async () => {
-    const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "video",
-    });
-    return { url: uploadResult.url };
-};
-result()
-    .then(result => {
-        console.log(result.url)
-        res.json(result)
-    })
-    .catch(err => {
-        res.json(err)
-    })
+    const result = async () => {
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+            resource_type: "video",
+        });
+        return { url: uploadResult.url };
+    };
+    result()
+        .then(result => {
+            console.log(result.url)
+            res.status(200).json(result) // The uploaded video's URL is returned as a JSON response
+        })
+        .catch(error => res.status(500).json({ message: 'Video upload failed' }))
 });
 
+// Route for uploading metadata of a post
 app.post('/api/uploadMetaData',upload.none(), (req, res) => {
     const post = new Post({
         userName: req.body.userName,
@@ -81,18 +72,22 @@ app.post('/api/uploadMetaData',upload.none(), (req, res) => {
         postID: req.body.postID,
         videoURL: req.body.videoURL,
     })
-    post.save().then(result => {
-        res.json(result);
-        console.log("result: "+result.userName+", "+result.date+", "+result.postID+", "+result.videoURL);
-        //mongoose.connection.close();
-    }).catch(err => res.json(err))
+    // Save the post to the database
+    post.save()
+        .then(result => {
+            res.status(200).json(result);
+            console.log("result: "+result.userName+", "+result.date+", "+result.postID+", "+result.videoURL);
+        })
+        .catch(err => {res.status(400).json(err)})
 });
 
+// Route for retrieving a video post by postID
 app.get("/api/video/:postID", async(req, res) => {
     const postID = req.params.postID;
+    // Find a post with the given postID
     const post = await Post.findOne({postID: postID}).exec();
     if(!post){
-        res.status(404).json("");
+        res.status(200).json("");
         return;
     }
     res.status(200).json(post);

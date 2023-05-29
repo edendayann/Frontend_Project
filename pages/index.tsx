@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { GetServerSideProps } from "next";
 import Layout from "../components/Layout";
 import Post, { PostProps } from "../components/Post";
@@ -59,39 +59,44 @@ type Props = {
   page: number;
   pageCount: number;
 };
-// export const todo = (post: PostProps) =>{
-
-  const getVideo = async (post: PostProps, setVideo: React.Dispatch<React.SetStateAction<null>>) =>{
-    try{
-      const result = await axios.get(`http://localhost:3001/api/video/${post.id}`)
-      if(result.data !== "")
-        setVideo(result.data.videoURL)
-    }
-    catch(e){
-      console.error('Error fetching video:',e)
-    }}
-//   return getVideo();
-  
-// }
-
 
 const Blog: React.FC<Props> = (props) => {
   const { feed, page, pageCount } = props;
+  const [video, setVideo] = useState(null);
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      for (const post of feed) {
+        try {
+          const result = await axios.get(`http://localhost:3001/api/video/${post.id}`);
+          if (result.data !== "") {
+            setVideo(result.data.videoURL);
+          }
+        } catch (e) {
+          console.error(`Error fetching video for post ${post.id}:`, e);
+        }
+      }
+    };
+    fetchVideos();
+  }, [feed]);
 
   return (
     <Layout>
       <div className="page">
         <h1><center>Public Feed</center></h1>
         <main>
-          {feed.map((post) => {
-            const [video, setVideo] = useState(null);
-            getVideo(post, setVideo)
-            return (
-              <div key={post.id} className="post">
-                <Post post={post} video = {video} />
-              </div>
-            )
-          })}
+          {feed.map((post) => (
+            <div key={post.id} className="post">
+              <Post post={post}  video={video}  />
+              {video ? (
+                <p>
+                  <a href={video} target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>
+                    Watch Video
+                  </a>
+                </p>
+              ) : "No video"}
+            </div>
+          ))}
         </main>
         <b><center>{pageCount === 0 ? "No posts available!" : ""}</center></b>
         <div>

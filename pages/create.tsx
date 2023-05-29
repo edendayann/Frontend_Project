@@ -62,44 +62,14 @@ const Draft: React.FC = () => {
   setLoading(false)
 
   };
-  
-  const handleUploadButtonClick =() => {
-    document.getElementById('videoFile')?.click();
-  }
- 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) 
       setVideo(files[0]);
   };
-
-  // const handleUpload = async () => {
-  //   setLoading(true);
-  //   document.getElementById('videoFile')?.click();
-    
-  //   setLoading(false)
-  // };
   
-  
-  // const Spinner = () => {  
-  //   return (
-  //     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-  //         <div
-  //           style={{
-  //             display: 'inline-block',
-  //             width: '50px',
-  //             height: '50px',
-  //             border: '3px solid #cccccc',
-  //             borderTopColor: '#ffffff',
-  //             borderRadius: '50%',
-  //             animation: 'spin 1s infinite linear',
-  //           }}
-  //         ></div>
-  //     </div>
-  //   );
-  // };
-  
-  useEffect(() => {titleInputRef.current?.focus()}, [])  //MAYA
+  useEffect(() => {titleInputRef.current?.focus()}, []) 
 
   const override: CSSProperties = {
     display: "block",
@@ -113,7 +83,7 @@ const Draft: React.FC = () => {
         <form onSubmit={submitData}>
           <h1>New Draft</h1>
           <input
-            ref={titleInputRef}  //MAYA
+            ref={titleInputRef}  
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title"
             type="text"
@@ -138,10 +108,7 @@ const Draft: React.FC = () => {
             <div>
               {loading? <BarLoader color="black" loading={loading} cssOverride={override} /> : 'Create'}
             </div>
-            {/* {loading ? <p><Spinner/></p> : <p>Create</p>} */}
           </button>
-
-          {/* <input disabled={!content || !title} type="submit" value="Create" /> */}
           <a className="back" href="#" onClick={() => Router.push("/")}>
             or Cancel
           </a>

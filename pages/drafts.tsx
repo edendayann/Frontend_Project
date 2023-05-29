@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
 import Layout from "../components/Layout";
 import Post, { PostProps } from "../components/Post";
 import { useSession, getSession } from "next-auth/react";
 import prisma from '../lib/prisma'
+import axios from "axios";
 
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
@@ -35,6 +36,25 @@ type Props = {
 
 const Drafts: React.FC<Props> = (props) => {
   const {data: session}= useSession();
+  const {drafts} = props;
+  const [video, setVideo] = useState(null);
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      for (const post of drafts) {
+        try {
+          const result = await axios.get(`http://localhost:3001/api/video/${post.id}`);
+          if (result.data !== "") 
+            setVideo(result.data.videoURL);
+          else 
+            setVideo(null)
+        } catch (e) {
+          console.error(`Error fetching video for post ${post.id}:`, e);
+        }
+      }
+    };
+    fetchVideos();
+  }, [drafts]);
 
   if (!session) {
     return (
@@ -52,7 +72,14 @@ const Drafts: React.FC<Props> = (props) => {
         <main>
           {props.drafts.map((post) => (
             <div key={post.id} className="post">
-              <Post post={post} video={undefined} />
+              <Post post={post}  video={video}  />
+              {video ? (
+                <p>
+                  <a href={video} target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>
+                    Watch Video
+                  </a>
+                </p>
+              ) : ""}
             </div>
           ))}
         </main>

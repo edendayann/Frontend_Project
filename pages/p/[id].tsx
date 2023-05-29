@@ -25,17 +25,11 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   };
 };
 
-// This function is used to publish a post by making a PUT request to the server.
-async function publishPost(id: number): Promise<void> {
-  await fetch(`/api/publish/${id}`, {
-    method: "PUT",
-  });
-  await Router.push("/");
-}
+
 
 // The Post component displays the details of a blog post.
 const Post: React.FC<PostProps> = (props) => {
-  const [isDeleted, setDeleted] = useState(false); // Maya - added in purpose of refresh after delete
+  const [isDeleted, setDeleted] = useState(false);
   const [finished, setFinished] = useState(false);
   const [video, setVideo] = useState(null);
   useEffect(()=>{
@@ -51,10 +45,10 @@ const Post: React.FC<PostProps> = (props) => {
     getVideo();},[])
 
   async function deletePost(id: number): Promise<void> {
-    await fetch(`/api/post/${id}`, {  //MAYA - the function was out of the component
+    await fetch(`/api/post/${id}`, {  
       method: "DELETE",
     });
-    setDeleted(!isDeleted); // Maya - added in purpose of refresh after delete
+    setDeleted(!isDeleted); 
     await Router.push("/drafts");
   }
 
@@ -66,6 +60,7 @@ async function publishPost(id: number): Promise<void> {
   setFinished(!finished);
   await Router.push("/");
 }
+
   // useSession is a custom hook provided by the next-auth/react package
   // It returns the session data and status (loading, authenticated, or unauthenticated)
   const { data: session, status } = useSession();
