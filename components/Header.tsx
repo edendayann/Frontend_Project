@@ -1,9 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
+import { FC, useContext } from 'react';
+import { ThemeContext } from "../theme-contexs";
 
 const Header: React.FC = () => {
+  const { theme, setTheme } = useContext(ThemeContext);
+  const handleThemeChange = () => {
+    const isCurrentDark = theme === 'dark';
+    setTheme(isCurrentDark ? 'light' : 'dark');
+  };
+
+  useEffect(() => {
+    document.body.className = theme;
+  }, [theme]);
+  
   const router = useRouter();
   const isActive: (pathname: string) => boolean = (pathname) =>
     router.pathname === pathname;
@@ -190,18 +202,38 @@ a {
     );
   }
 
+let myTheme = (
+  <header className="myTheme">
+        <a>Light/Dark mode</a>
+        <div className="toggle-btn-section">
+          <div className={`toggle-checkbox m-vertical-auto`}>
+            <input
+              className="toggle-btn__input"
+              type="checkbox"
+              name="checkbox"
+              onChange={handleThemeChange}
+              checked={theme === 'light'} />
+            <button type="button" className={`toggle-btn__input-label`} onClick={handleThemeChange}></button>
+          </div>
+        </div>
+    </header>
+)
   return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
     <nav>
-      {left}
-      {right}
-      <style jsx>{`
+        {left}
+        {right}
+        {myTheme}
+        <style jsx>{`
         nav {
           display: flex;
           padding: 2rem;
           align-items: center;
         }
       `}</style>
-    </nav>
+      </nav>
+      </ThemeContext.Provider>
+
   );
 };
 

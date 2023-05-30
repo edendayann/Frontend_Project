@@ -5,15 +5,15 @@ import Post, { PostProps } from "../components/Post";
 import { useSession, getSession } from "next-auth/react";
 import prisma from '../lib/prisma'
 import axios from "axios";
+import { BiCameraMovie } from 'react-icons/bi';
 
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
   if (!session) {
     res.statusCode = 403;
-    return { props: { drafts: [] } };
+    return { props: { drafts: [], videos: [] } };
   }
-
   const drafts = await prisma.post.findMany({
     where: {
       author: { email: session.user?.email },
@@ -25,36 +25,23 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       },
     },
   });
-  return {
-    props: { drafts },
-  };
+  
+  const postIDs = drafts.map((post) => post.id)
+  const result = await axios.post(`http://localhost:3001/api/video`,{postIDs});
+  if(Array.isArray(result.data))
+    return { props: { drafts: drafts, videos: result.data } };
+  else
+    return { props: { drafts: drafts, videos: [] } };
 };
 
 type Props = {
   drafts: PostProps[];
+  videos: any[];
 };
 
 const Drafts: React.FC<Props> = (props) => {
   const {data: session}= useSession();
-  const {drafts} = props;
-  const [video, setVideo] = useState(null);
-
-  useEffect(() => {
-    const fetchVideos = async () => {
-      for (const post of drafts) {
-        try {
-          const result = await axios.get(`http://localhost:3001/api/video/${post.id}`);
-          if (result.data !== "") 
-            setVideo(result.data.videoURL);
-          else 
-            setVideo(null)
-        } catch (e) {
-          console.error(`Error fetching video for post ${post.id}:`, e);
-        }
-      }
-    };
-    fetchVideos();
-  }, [drafts]);
+  const {drafts, videos} = props;
 
   if (!session) {
     return (
@@ -70,18 +57,18 @@ const Drafts: React.FC<Props> = (props) => {
       <div className="page">
         <h1><center>My Drafts</center></h1>
         <main>
-          {props.drafts.map((post) => (
-            <div key={post.id} className="post">
-              <Post post={post}  video={video}  />
-              {video ? (
-                <p>
-                  <a href={video} target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>
-                    Watch Video
-                  </a>
-                </p>
-              ) : ""}
-            </div>
-          ))}
+          {drafts.map((post) => {
+            const video = videos.find(tmp => tmp.postID == post.id)
+            let url ="";
+            if(video)
+              url = video.videoURL;
+            return (
+              <div key={post.id} className="post">
+                <Post post={post}  video={url}  />
+              </div>
+            )
+          }
+            )}
         </main>
       </div>
       <style jsx>{`

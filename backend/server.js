@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
 const multer = require('multer') // multer for handling file uploads
 const upload = multer({ dest: 'uploads/' });  //sets the destination folder for uploaded files.
@@ -7,6 +8,7 @@ const express = require("express");
 const cors = require('cors');
 const app = express();
 app.use(cors());
+app.use(bodyParser.json());
 
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;  // for uploading files to Cloudinary.
@@ -92,6 +94,21 @@ app.get("/api/video/:postID", async(req, res) => {
     }
     res.status(200).json(post);
 })
+
+app.post("/api/video", async (req, res) => {
+    const postIDs = req.body.postIDs;
+    try {
+        const posts = await Post.find({ postID: { $in: postIDs } }).exec();
+        if(!posts){
+            res.status(200).json("");
+            return;
+        }
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while retrieving the video posts.' });
+    }
+  });
 
 // Start the server
 const server = app.listen(3001, () => {

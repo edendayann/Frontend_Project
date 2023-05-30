@@ -14,7 +14,7 @@ const Draft: React.FC = () => {
   const { data: session, status } = useSession();  
 
   const videoInput = useRef<HTMLInputElement>(null);
-  const titleInputRef = useRef<HTMLInputElement>(null);  //MAYA
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   let email = session?.user?.email;
   

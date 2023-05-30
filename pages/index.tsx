@@ -45,9 +45,13 @@ export const getServerSideProps: GetServerSideProps = async ({ query, req }) => 
     }
   });
 
+  const postIDs = feed.map((post) => post.id)
+  const videos = (await axios.post(`http://localhost:3001/api/video`,{postIDs})).data;
+
   return {
     props: {
       feed,
+      videos,
       page,
       pageCount: Math.ceil(count / perPage),
     },
@@ -56,47 +60,30 @@ export const getServerSideProps: GetServerSideProps = async ({ query, req }) => 
 
 type Props = {
   feed: PostProps[];
+  videos: any[];
   page: number;
   pageCount: number;
 };
 
 const Blog: React.FC<Props> = (props) => {
-  const { feed, page, pageCount } = props;
-  const [video, setVideo] = useState(null);
-
-  useEffect(() => {
-    const fetchVideos = async () => {
-      for (const post of feed) {
-        try {
-          const result = await axios.get(`http://localhost:3001/api/video/${post.id}`);
-          if (result.data !== "") {
-            setVideo(result.data.videoURL);
-          }
-        } catch (e) {
-          console.error(`Error fetching video for post ${post.id}:`, e);
-        }
-      }
-    };
-    fetchVideos();
-  }, [feed]);
+  const { feed, videos, page, pageCount } = props;
 
   return (
     <Layout>
       <div className="page">
         <h1><center>Public Feed</center></h1>
         <main>
-          {feed.map((post) => (
-            <div key={post.id} className="post">
-              <Post post={post}  video={video}  />
-              {video ? (
-                <p>
-                  <a href={video} target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>
-                    Watch Video
-                  </a>
-                </p>
-              ) : "No video"}
-            </div>
-          ))}
+          {feed.map((post) => {
+            const video = videos.find(tmp => tmp.postID == post.id)
+            let url ="";
+            if(video)
+              url = video.videoURL;
+            return (
+              <div key={post.id} className="post">
+                <Post post={post}  video={url}  />
+              </div>
+            )
+          } )}
         </main>
         <b><center>{pageCount === 0 ? "No posts available!" : ""}</center></b>
         <div>

@@ -7,6 +7,7 @@ import { PostProps } from "../../components/Post";
 import prisma from '../../lib/prisma'
 import { useSession } from "next-auth/react";
 import axios from "axios";
+import { BiCameraMovie } from "react-icons/bi";
 
 // This function retrieves the post data from the database based on the provided id.
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
@@ -20,35 +21,32 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
       },
     },
   });
+  const postID = params?.id
+  let video = ""
+  const result = await axios.get(`http://localhost:3001/api/video/${postID}`);
+  console.log("data: "+result.data)
+  if(result.data!="")
+    video = result.data.videoURL
   return {
-    props: post ?? { author: { name: "Me" }}
+    props: {post: post ?? { author: { name: "Me" }}, video},
   };
+};
+
+type Props = {
+  post: PostProps;
+  video: any;
 };
 
 
 
-// The Post component displays the details of a blog post.
-const Post: React.FC<PostProps> = (props) => {
-  const [isDeleted, setDeleted] = useState(false);
-  const [finished, setFinished] = useState(false);
-  const [video, setVideo] = useState(null);
-  useEffect(()=>{
-    const getVideo=async()=>{
-      try{
-        const result = await axios.get(`http://localhost:3001/api/video/${props.id}`)
-        if(result.data !== "")
-          setVideo(result.data.videoURL)
-      }
-      catch(e){
-        console.error('Error fetching video:',e)
-      }}
-    getVideo();},[])
+// // The Post component displays the details of a blog post.
+const Post: React.FC<Props> = (props) => {
+  const {post, video} = props;
 
   async function deletePost(id: number): Promise<void> {
     await fetch(`/api/post/${id}`, {  
       method: "DELETE",
     });
-    setDeleted(!isDeleted); 
     await Router.push("/drafts");
   }
 
@@ -57,7 +55,6 @@ async function publishPost(id: number): Promise<void> {
   await fetch(`/api/publish/${id}`, {
     method: "PUT",
   });
-  setFinished(!finished);
   await Router.push("/");
 }
 
@@ -72,39 +69,43 @@ async function publishPost(id: number): Promise<void> {
   // Check if the user has a valid session
   const userHasValidSession = Boolean(session);
   // Check if the post belongs to the currently authenticated user
-  const postBelongsToUser = session?.user?.email === props.author?.email;
+  const postBelongsToUser = session?.user?.email === post.author?.email;
 
   // Append "(Draft)" to the title if the post is not published
-  let title = props.title;
-  if (!props.published) {
+  let title = post.title;
+  if (!post.published) {
     title = `${title} (Draft)`;
   }
-
   return (
     <Layout>
       <div>
         <h2>{title}</h2>
-        <p>By {props?.author?.name || "Unknown author"}</p>
-        <ReactMarkdown children={props.content} />
-        {video && (
-        <p>
-          <a href={video} target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>
-            Watch Video
-          </a>
-        </p>
-      )}
+        <p>By {post?.author?.name || "Unknown author"}</p>
+        <ReactMarkdown children={post.content} />
+        {video != "" ? (
+                <p><a href={video} target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>
+                  <BiCameraMovie style={{ fontSize: '30px' , color: 'black'}} />
+                </a></p>
+            ) : "No video"}
         {/* Display the Publish button if the post is a draft and the user is authenticated and owns the post */}
-        {!props.published && userHasValidSession && postBelongsToUser && (
-          <button onClick={() => publishPost(props.id)}>Publish</button>
+        {!post.published && userHasValidSession && postBelongsToUser && (
+          <button onClick={() => publishPost(post.id)}>Publish</button>
         )}
 
         {/* Display the Delete button if the user is authenticated and owns the post */}
         {userHasValidSession && postBelongsToUser && (
-          <button onClick={() => deletePost(props.id)}>Delete</button>
+          <button onClick={() => deletePost(post.id)}>Delete</button>
         )}
       </div>
 
       <style jsx>{`
+
+div {
+  background: #e1fbf2;
+  transition: box-shadow 0.1s ease-in;
+  box-shadow: 1px 1px 3px #aaa;
+  padding: 1rem;
+}
         .page {
           background: white;
           padding: 2rem;
@@ -113,12 +114,16 @@ async function publishPost(id: number): Promise<void> {
         .actions {
           margin-top: 2rem;
         }
-
-        button {
-          background: #ececec
-          border: 0;
-          border-radius: 0.125rem;
-          padding: 1rem 2rem;
+        a {
+          text-decoration: none;
+          color: #000;
+          background: transpparent;
+          display: inline-block;
+        }
+        
+        a + a {
+          margin-left: 1rem;
+          background: transparent;
         }
 
         button + button {
@@ -130,3 +135,4 @@ async function publishPost(id: number): Promise<void> {
 };
 
 export default Post;
+
