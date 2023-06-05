@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext } from "react";
 import type { GetServerSideProps } from "next";
 import Layout from "../components/Layout";
 import Post, { PostProps } from "../components/Post";
@@ -6,6 +6,9 @@ import prisma from '../lib/prisma'
 import Pagination from "../components/Pagination";
 import { getSession } from "next-auth/react";
 import axios from "axios";
+//import { ThemeContext } from "../components/ThemeContext";
+
+// const isDark = useContext(ThemeContext);
 
 export const getServerSideProps: GetServerSideProps = async ({ query, req }) => {
   const page = parseInt(query.page as string, 10) || 1;
@@ -92,7 +95,7 @@ const Blog: React.FC<Props> = (props) => {
       </div>
      <style jsx>{`
   .post {
-    background: rgba(238, 251, 245, 0.550);
+    background: rgba(238, 251, 245, 0.685);
     transition: box-shadow 0.1s ease-in;
   }
   .post:hover {

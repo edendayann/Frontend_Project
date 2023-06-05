@@ -60,7 +60,6 @@ app.post('/api/upload', parser.single('video'), (req, res) => {
     };
     result()
         .then(result => {
-            console.log(result.url)
             res.status(200).json(result) // The uploaded video's URL is returned as a JSON response
         })
         .catch(error => res.status(500).json({ message: 'Video upload failed' }))
@@ -78,7 +77,6 @@ app.post('/api/uploadMetaData',upload.none(), (req, res) => {
     post.save()
         .then(result => {
             res.status(200).json(result);
-            console.log("result: "+result.userName+", "+result.date+", "+result.postID+", "+result.videoURL);
         })
         .catch(err => {res.status(400).json(err)})
 });

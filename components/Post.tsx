@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Router, { useRouter } from "next/router";
 import ReactMarkdown from "react-markdown";
-import axios from "axios";
 import { BiCameraMovie } from "react-icons/bi";
 
 export type PostProps = {

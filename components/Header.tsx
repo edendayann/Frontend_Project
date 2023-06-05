@@ -1,21 +1,23 @@
-import React, { useEffect } from "react";
+import React, { createContext, useState } from "react";
+import ReactDOM from "react-dom/client";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
-import { FC, useContext } from 'react';
-import { ThemeContext } from "../theme-contexs";
+//import { ThemeContext } from './ThemeContext';
+
+export const getStyle = (isDark: boolean) => 
+  isDark ?
+    {
+    background: 'black',
+    color: 'white',
+    } : {
+    background: 'rgba(238, 251, 245, 0.864)',
+    color: '#000',
+    }
 
 const Header: React.FC = () => {
-  const { theme, setTheme } = useContext(ThemeContext);
-  const handleThemeChange = () => {
-    const isCurrentDark = theme === 'dark';
-    setTheme(isCurrentDark ? 'light' : 'dark');
-  };
+  const [isDark, setIsDark] = useState(false);
 
-  useEffect(() => {
-    document.body.className = theme;
-  }, [theme]);
-  
   const router = useRouter();
   const isActive: (pathname: string) => boolean = (pathname) =>
     router.pathname === pathname;
@@ -70,7 +72,6 @@ a {
             font-weight: bold;
           }
 
-
           a + a {
             margin-left: 1rem;
           }
@@ -92,29 +93,41 @@ a {
   if (!session) {
     right = (
       <div className="right">
+        {/* <button onClick={() => setIsDark(!isDark)}>
+          <a style={getStyle(isDark)}>{isDark ? "Light Mode" : "Dark Mode"}</a>
+        </button> */}
         <Link href="/api/auth/signin" legacyBehavior>
-          <a data-active={isActive("/signup")}>Log in</a>
+          <a /*style={getStyle(isDark)}*/ data-active={isActive("/signup")}>Log in</a>
         </Link>
         <style jsx>{`
           a {
             text-decoration: none;
             color: #000;
+            background: rgba(238, 251, 245, 0.864);
             display: inline-block;
           }
-
+          
           a + a {
             margin-left: 1rem;
+            background: transparent;
           }
 
           .right {
+            background: transparent;
             margin-left: auto;
           }
 
           .right a {
             border: 1px solid black;
             padding: 0.5rem 1rem;
-            border-radius: 3px;
+            border-radius: 5px;
           }
+
+          button {
+            background: transparent;
+            border: none;
+          }
+
         `}</style>
       </div>
     );
@@ -154,13 +167,16 @@ a {
         <p>
           {session.user?.name} ({session.user?.email})
         </p>
+        {/* <button onClick={() => setIsDark(!isDark)}>
+          <a style={getStyle(isDark)}>{isDark ? "Light Mode" : "Dark Mode"}</a>
+        </button> */}
         <Link href="/create" legacyBehavior>
           <button>
-            <a>New post</a>
+            <a /*style={getStyle(isDark)}*/>New post</a>
           </button>
         </Link>
         <button onClick={() => signOut()}>
-          <a>Log out</a>
+          <a /*style={getStyle(isDark)}*/>Log out</a>
         </button>
         <style jsx>{`
           a {
@@ -202,28 +218,11 @@ a {
     );
   }
 
-let myTheme = (
-  <header className="myTheme">
-        <a>Light/Dark mode</a>
-        <div className="toggle-btn-section">
-          <div className={`toggle-checkbox m-vertical-auto`}>
-            <input
-              className="toggle-btn__input"
-              type="checkbox"
-              name="checkbox"
-              onChange={handleThemeChange}
-              checked={theme === 'light'} />
-            <button type="button" className={`toggle-btn__input-label`} onClick={handleThemeChange}></button>
-          </div>
-        </div>
-    </header>
-)
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-    <nav>
+    // <ThemeContext.Provider value={isDark}>
+      <nav>
         {left}
         {right}
-        {myTheme}
         <style jsx>{`
         nav {
           display: flex;
@@ -232,7 +231,7 @@ let myTheme = (
         }
       `}</style>
       </nav>
-      </ThemeContext.Provider>
+    // </ThemeContext.Provider>
 
   );
 };

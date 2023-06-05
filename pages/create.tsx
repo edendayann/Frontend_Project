@@ -98,9 +98,20 @@ const Draft: React.FC = () => {
           />
           <input
             type="file"
+            disabled = {video ? true : false}
+            id="videoUpload"
+            name="videoUpload"
             onChange={handleChange}
             ref={videoInput}
+            accept="video/*"
           />
+          <div>
+          <button
+            disabled = {!video}
+            onClick={() => {setVideo(undefined); if(videoInput.current) videoInput.current.value = ""}}
+            >
+              Reset Video
+          </button>
           <button
             disabled={!content || !title || loading}  // Disable button when form fields are empty or when the form is being submitted
             onSubmit={submitData}  // Call handleCreateButtonClick when the "Create" button is clicked
@@ -112,6 +123,7 @@ const Draft: React.FC = () => {
           <a className="back" href="#" onClick={() => Router.push("/")}>
             or Cancel
           </a>
+          </div>
         </form>
       </div>
       <style jsx>{`
@@ -136,6 +148,10 @@ const Draft: React.FC = () => {
           background: #ececec;
           border: 0;
           padding: 1rem 2rem;
+        }
+
+        button + button {
+          margin-left: 1rem;
         }
 
         .back {
