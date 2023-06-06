@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## Submission: 
 1. Submission is in pairs, but it's better for practice if you start alone.
 2. Coding: 70%, Questions: 30%.
@@ -147,3 +148,6 @@ There are going to be 5 pass/no pass tests for this part.
 
 
 
+=======
+# HW-bgu
+>>>>>>> 2f559bed1e8078cf7da34ff1b56d03cdba61b9d9
