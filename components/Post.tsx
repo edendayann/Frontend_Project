@@ -16,7 +16,6 @@ export type PostProps = {
 
 const Post: React.FC<{ post: PostProps, video: any}> = ({ post, video }) => {
   const authorName = post.author ? post.author.name : "Unknown author";
-  const router = useRouter();
 
     return (
     <div onClick={() => Router.push(`/p/${post.id}`)}>

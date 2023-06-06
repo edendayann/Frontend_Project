@@ -1,6 +1,6 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { Router, useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
 //import { ThemeContext } from './ThemeContext';
 
@@ -15,13 +15,27 @@ export const getStyle = (isDark: boolean) =>
     }
 
 const Header: React.FC = () => {
-  const [isDark, setIsDark] = useState(false);
+ // const [isDark, setIsDark] = useState(false);
+  const [session, setSession] = useState<{token: string, username: string, name: string}>()
+// const {data: session, status} = useSession();
+
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    if (loggedUserJSON) {
+      setSession(JSON.parse(loggedUserJSON))
+      if(session)
+        console.log("user is logged11 in:  " +session.name)
+    }
+  }, [])
+
+  const logout = () => {
+    window.localStorage.removeItem('loggedNoteappUser');
+    setSession(undefined);
+  }
 
   const router = useRouter();
   const isActive: (pathname: string) => boolean = (pathname) =>
     router.pathname === pathname;
-
-  const {data: session, status} = useSession();
 
   let left = (
     <div className="left">
@@ -50,53 +64,19 @@ const Header: React.FC = () => {
   );
 
   let right = null;
-
-  if (status === 'loading') {
-    left = (
-      <div className="left">
-        <Link href="/" legacyBehavior>
-          <a className="feed" data-active={isActive("/")}>
-            Feed
-          </a>
-        </Link>
-        <style jsx>{`
-a {
-            text-decoration: none;
-            color: gray;
-            display: inline-block;
-          }
-
-          .left a[data-active="true"] {
-            color: black;
-            font-weight: bold;
-          }
-
-          a + a {
-            margin-left: 1rem;
-          }
-        `}</style>
-      </div>
-    );
-    right = (
-      <div className="right">
-        <p>Validating session ...</p>
-        <style jsx>{`
-          .right {
-            margin-left: auto;
-          }
-        `}</style>
-      </div>
-    );
-  }
-
   if (!session) {
     right = (
       <div className="right">
          <Link href="/signUp" legacyBehavior>
+          <button>
           <a data-active={isActive("/signup")}>Sign Up</a>
+          </button>
         </Link>
-        <Link href="/api/auth/signin" legacyBehavior>
+
+        <Link href="/login" legacyBehavior>
+          <button>
           <a data-active={isActive("/signup")}>Log in</a>
+          </button>
         </Link>
         <style jsx>{`
           a {
@@ -105,7 +85,14 @@ a {
             background: rgba(238, 251, 245, 0.864);
             display: inline-block;
           }
-          
+
+          p {
+            background: transparent;
+            display: inline-block;
+            font-size: 13px;
+            padding-right: 1rem;
+          }
+
           a + a {
             margin-left: 1rem;
             background: transparent;
@@ -122,11 +109,15 @@ a {
             border-radius: 5px;
           }
 
+          .right a:hover {
+            background-color: #e1fbf2;
+            box-shadow: 1px 1px 3px #aaa;
+          }
+
           button {
             background: transparent;
             border: none;
           }
-
         `}</style>
       </div>
     );
@@ -161,11 +152,23 @@ a {
         `}</style>
       </div>
     );
+
+    const objectParams = {
+      param1: session.name,
+      param2: session.username,
+    };
+    
+    const queryString = new URLSearchParams(objectParams).toString();
+    console.log(queryString)
     right = (
       <div className="right">
-        <p>
-          {session.user?.name} ({session.user?.email})
-        </p>
+        <b>
+        {/*TODO eden email*/}
+          {session.name} 
+        </b>
+        <Link href={`/profile/:${session.name}`} legacyBehavior>
+            <a>My Profile</a>
+        </Link>
         {/* <button onClick={() => setIsDark(!isDark)}>
           <a style={getStyle(isDark)}>{isDark ? "Light Mode" : "Dark Mode"}</a>
         </button> */}
@@ -174,7 +177,7 @@ a {
             <a /*style={getStyle(isDark)}*/>New post</a>
           </button>
         </Link>
-        <button onClick={() => signOut()}>
+        <button onClick={() => logout()}>
           <a /*style={getStyle(isDark)}*/>Log out</a>
         </button>
         <style jsx>{`
@@ -206,6 +209,11 @@ a {
             border: 1px solid black;
             padding: 0.5rem 1rem;
             border-radius: 5px;
+          }
+
+          .right a:hover {
+            background-color: #e1fbf2;
+            box-shadow: 1px 1px 3px #aaa;
           }
 
           button {

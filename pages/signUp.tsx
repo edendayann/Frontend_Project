@@ -19,7 +19,7 @@ const NewUser: React.FC = () => {
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
-
+//try catch
     // const body = { fullName, email, userName, password };
     // const response = await fetch(`/api/uploadUserData`, {
     //   method: "POST",

@@ -3,8 +3,10 @@ const bodyParser = require('body-parser');
 const multer = require('multer') // multer for handling file uploads
 const upload = multer({ dest: 'uploads/' });  //sets the destination folder for uploaded files.
 const express = require("express");
+require('dotenv').config();
 const cors = require('cors');
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const usersRouter = express.Router()
 
 const app = express();
@@ -41,6 +43,8 @@ mongoose.connect(mongoURL)
 
 // Defines a Mongoose schema for the Post model
 const mongoSchema = new mongoose.Schema({
+    title: String,
+    content: String,
     userName: String,
     date: String,
     postID: String,
@@ -74,6 +78,8 @@ app.post('/api/upload', parser.single('video'), (req, res) => {
 // Route for uploading metadata of a post
 app.post('/api/uploadMetaData',upload.none(), (req, res) => {
     const post = new Post({
+        title: req.body.title,
+        content: req.body.connect,
         userName: req.body.userName,
         date: req.body.date,
         postID: req.body.postID,
@@ -120,6 +126,7 @@ const UserSchema = new mongoose.Schema({
     Email: String,
     UserName: String,
     Password: String,
+    Token: String,
 })
 
 const User = mongoose.model('User', UserSchema)
@@ -164,6 +171,30 @@ app.post('/api/uploadUserData',upload.none(), async (req, res) => {
         .catch(err => {res.status(400).json(err)})
 });
 
+app.post('/api/login',upload.none(), async (req, res) => {
+    const { userName, password } = req.body
+
+    const user = await User.findOne({ UserName: userName });
+    const passwordCorrect = user === null
+      ? false
+      : bcrypt.compare(password, user.Password)
+  
+    if (! passwordCorrect) {
+      return res.status(401).json({
+        error: 'invalid username or password'
+      })
+    }
+  
+    const userForToken = {
+      userName: user.UserName,
+      id: user._id,
+    }
+  
+    const token = jwt.sign(userForToken, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTIiLCJuYW1lIjoiem9oYXIgZWRlbiBtYXlhIiwiaWF0IjoxNTE2MjM5MDIyfQ.yStqsP9WD5HmBCNRTdoatO-FgOpWmEhOCIjs7HCLTNc')
+    await User.updateOne({ UserName: userName },{ $set: { Token: token }});
+    res.status(200)
+       .send({ token, username: user.UserName, name: user.FullName })
+  })
 
 // Start the server
 const server = app.listen(3001, () => {

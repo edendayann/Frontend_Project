@@ -12,6 +12,7 @@ const Draft: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [video, setVideo] = useState<File>(); 
   const { data: session, status } = useSession();  
+  const [token, setToken] = useState(""); 
 
   const videoInput = useRef<HTMLInputElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -30,34 +31,34 @@ const Draft: React.FC = () => {
       });
       const postData = await response.json();
       const postID = postData.id
-    if (video) {
-      let url = '';
-      const videoFile = new FormData();
-      videoFile.append('video', video, video.name);
-      videoFile.append('upload_preset', 'xgg6txjv');
-      await axios.post('http://localhost:3001/api/upload', videoFile, {
-        headers: {
-          'Content-Type' : 'multipart/form-data',
-        },
-      }).then(result => 
-        url = result.data.url)
-      .catch(error => console.log(error))
-
-      const videoData = new FormData();
-      videoData.append('postID', postID);
-      videoData.append('videoURL', url);
-      videoData.append('date', new Date().toString());
-      if(session && session.user && session.user.name)
-        videoData.append('userName', session.user.name);
-      await axios.post('http://localhost:3001/api/uploadMetaData', videoData, {
-        headers: {
-          'Content-Type' : 'multipart/form-data',
-        },
-      })
-    }
-    await Router.push("/drafts");
-  } catch (error) { console.error(error) }
-  setLoading(false)
+      const metaData = new FormData();
+      metaData.append('postID', postID);
+      metaData.append('title', title);
+      metaData.append('content', content);
+      if (video) {
+        let url = '';
+        const videoFile = new FormData();
+        videoFile.append('video', video, video.name);
+        videoFile.append('upload_preset', 'xgg6txjv');
+        await axios.post('http://localhost:3001/api/upload', videoFile, {
+          headers: {
+            'Content-Type' : 'multipart/form-data',
+          },
+        }).then(result => url = result.data.url)
+          .catch(error => console.log(error))
+        metaData.append('videoURL', url);
+        metaData.append('date', new Date().toString());
+        if(session && session.user && session.user.name)
+          metaData.append('userName', session.user.name);
+      }
+      await axios.post('http://localhost:3001/api/uploadMetaData', metaData, {
+          headers: {
+            'Content-Type' : 'multipart/form-data',
+          },
+        })
+      await Router.push("/drafts");
+    } catch (error) { console.error(error) }
+    setLoading(false)
 
   };
 
