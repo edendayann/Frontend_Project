@@ -1,5 +1,4 @@
 import React, { createContext, useState } from "react";
-import ReactDOM from "react-dom/client";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
@@ -93,11 +92,11 @@ a {
   if (!session) {
     right = (
       <div className="right">
-        {/* <button onClick={() => setIsDark(!isDark)}>
-          <a style={getStyle(isDark)}>{isDark ? "Light Mode" : "Dark Mode"}</a>
-        </button> */}
+         <Link href="/signUp" legacyBehavior>
+          <a data-active={isActive("/signup")}>Sign Up</a>
+        </Link>
         <Link href="/api/auth/signin" legacyBehavior>
-          <a /*style={getStyle(isDark)}*/ data-active={isActive("/signup")}>Log in</a>
+          <a data-active={isActive("/signup")}>Log in</a>
         </Link>
         <style jsx>{`
           a {

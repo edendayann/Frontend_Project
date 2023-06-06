@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 import Router from "next/router";
 import {useSession} from "next-auth/react";
 import axios from 'axios';
-import { BarLoader, ClipLoader, PropagateLoader } from 'react-spinners';
+import { BarLoader } from 'react-spinners';
 
 
 const Draft: React.FC = () => {
@@ -21,7 +21,6 @@ const Draft: React.FC = () => {
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
-    const isVideo = video ? "true" : "";
     try {
       const body = { title, content, session, email };
       const response = await fetch(`/api/post`, {
@@ -42,7 +41,6 @@ const Draft: React.FC = () => {
         },
       }).then(result => 
         url = result.data.url)
-        //result => result ? url = result.data.url : url = ''
       .catch(error => console.log(error))
 
       const videoData = new FormData();
