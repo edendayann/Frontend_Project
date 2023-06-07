@@ -98,11 +98,14 @@ const Pagination: React.FC<Props> = (props) => {
 
   .pagination__item:hover {
     background-color: #e1fbf2;
+    box-shadow: 1px 1px 3px #aaa;
   }
 
   .pagination__item--active {
-    background-color: gray;
-    color: #fff;
+    background-color: rgb(210, 210, 210);
+    color: black;
+    font-weight: bold;
+  }
     `}</style> </>
   );
 };

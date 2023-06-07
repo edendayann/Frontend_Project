@@ -32,7 +32,7 @@ const NewUser: React.FC = () => {
     userData.append('userName', userName);
     userData.append('password', password);
     
-    await axios.post('http://localhost:3001/api/uploadUserData', userData, {
+    await axios.post('http://localhost:3001/api/signUp', userData, {
         headers: {
           'Content-Type' : 'multipart/form-data',
         },

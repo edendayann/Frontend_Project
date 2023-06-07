@@ -41,14 +41,26 @@ const mongoURL = `mongodb+srv://hazaniz:zohar112@cluster0.1s9hgkt.mongodb.net/?r
 mongoose.set('strictQuery', false)
 mongoose.connect(mongoURL)
 
-// Defines a Mongoose schema for the Post model
 const mongoSchema = new mongoose.Schema({
-    title: String,
-    content: String,
-    userName: String,
+    postID: String, // TODO auto increment if prisma is deleted!
+    title: {
+        type: String,
+        required: true,
+    },
+    content: {
+        type: String,
+        required: true,
+    },
     date: String,
-    postID: String,
+    published: {
+        type: Boolean,
+        default: false,
+    },
     videoURL: String,
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
 })
 
 // Creates a Mongoose model named Post based on the defined schema
@@ -72,25 +84,33 @@ app.post('/api/upload', parser.single('video'), (req, res) => {
         .then(result => {
             res.status(200).json(result) // The uploaded video's URL is returned as a JSON response
         })
-        .catch(error => res.status(500).json({ message: 'Video upload failed' }))
+        .catch(error => res.status(500).json({ message: 'Video upload failed, with this error: ' + error }))
 });
 
 // Route for uploading metadata of a post
-app.post('/api/uploadMetaData',upload.none(), (req, res) => {
+app.post('/api/uploadMetaData',upload.none(), async (req, res) => {
+    const user = await User.findOne({ UserName: req.body.userName }); //TODO can be found by id- change create.tsx
     const post = new Post({
         title: req.body.title,
-        content: req.body.connect,
-        userName: req.body.userName,
+        content: req.body.content,
+        user: user.id,
         date: req.body.date,
         postID: req.body.postID,
         videoURL: req.body.videoURL,
     })
+
+    //EDEN: from meni's lecture- save post and update users posts. CHECK
+    const savedPost = await post.save();
+    user.Posts = user.Posts.concat(savedPost._id);
+    await user.save();
+
+    res.status(200).json(savedPost);
     // Save the post to the database
-    post.save()
-        .then(result => {
-            res.status(200).json(result);
-        })
-        .catch(err => {res.status(400).json(err)})
+    // post.save()
+    //     .then(result => {
+    //         res.status(200).json(result);
+    //     })
+    //     .catch(err => {res.status(400).json(err)})
 });
 
 // Route for retrieving a video post by postID
@@ -122,10 +142,31 @@ app.post("/api/video", async (req, res) => {
 
 ////////////////////////////////////  USER  ////////////////////////////////////////
 const UserSchema = new mongoose.Schema({
-    FullName: String,
-    Email: String,
-    UserName: String,
-    Password: String,
+    FullName: {
+        type: String,
+        required: true,
+    },
+    Email: {
+        type: String,
+        required: true,
+        unique: true,
+        match: /^[\w-]+(\.[\w-]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7}$/
+    },
+    UserName: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    Password: {
+        type: String,
+        required: true,
+    },
+    Posts: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Post'
+        }
+      ],
     Token: String,
 })
 
@@ -137,23 +178,7 @@ UserSchema.set('toJSON', {
       delete returnedObject.__v
 }})
 
-// usersRouter.post('/api/uploadUserData', async (request, response) => {
-//     const { fullName, email, userName, password } = request.body
-  
-//     const passwordHash = await bcrypt.hash(password, 10)
-//    // check email
-//     const user = new User({
-//         FullName: fullName,
-//         Email: email,
-//         UserName: userName,
-//         Password: passwordHash,
-//     })
-
-//     const savedUser = await user.save()
-//     response.status(201).json(savedUser)
-//   })
-
-app.post('/api/uploadUserData',upload.none(), async (req, res) => {
+app.post('/api/signUp',upload.none(), async (req, res) => {
     
     const passwordHash = await bcrypt.hash(req.body.password, 10)
 
@@ -193,7 +218,7 @@ app.post('/api/login',upload.none(), async (req, res) => {
     const token = jwt.sign(userForToken, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTIiLCJuYW1lIjoiem9oYXIgZWRlbiBtYXlhIiwiaWF0IjoxNTE2MjM5MDIyfQ.yStqsP9WD5HmBCNRTdoatO-FgOpWmEhOCIjs7HCLTNc')
     await User.updateOne({ UserName: userName },{ $set: { Token: token }});
     res.status(200)
-       .send({ token, username: user.UserName, name: user.FullName })
+       .send({ token, username: user.UserName, name: user.FullName, email: user.Email })
   })
 
 // Start the server

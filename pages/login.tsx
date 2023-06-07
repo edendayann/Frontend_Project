@@ -5,9 +5,7 @@ import Layout from '../components/Layout';
 import { BarLoader } from 'react-spinners';
 
 const App = () => {
-    const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('')
-
+  const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState('') 
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
@@ -44,9 +42,7 @@ const App = () => {
     } 
     catch (exception) {
         //we dont lieke this error
-      setErrorMessage('wrong credentials')
       setTimeout(() => {
-        setErrorMessage('')
       }, 5000)
     }
   }

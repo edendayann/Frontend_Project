@@ -1,7 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { Router, useRouter } from "next/router";
-import { signOut, useSession } from "next-auth/react";
 //import { ThemeContext } from './ThemeContext';
 
 export const getStyle = (isDark: boolean) => 
@@ -16,21 +15,21 @@ export const getStyle = (isDark: boolean) =>
 
 const Header: React.FC = () => {
  // const [isDark, setIsDark] = useState(false);
-  const [session, setSession] = useState<{token: string, username: string, name: string}>()
-// const {data: session, status} = useSession();
+  const [user, setUser] = useState<{token: string, username: string, name: string, email: string}>()
+// const {data: user, status} = useuser();
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
-      setSession(JSON.parse(loggedUserJSON))
-      if(session)
-        console.log("user is logged11 in:  " +session.name)
+      setUser(JSON.parse(loggedUserJSON))
+      if(user)
+        console.log("user is logged11 in:  " +user.name)
     }
   }, [])
 
   const logout = () => {
     window.localStorage.removeItem('loggedNoteappUser');
-    setSession(undefined);
+    setUser(undefined);
   }
 
   const router = useRouter();
@@ -64,7 +63,7 @@ const Header: React.FC = () => {
   );
 
   let right = null;
-  if (!session) {
+  if (!user) {
     right = (
       <div className="right">
          <Link href="/signUp" legacyBehavior>
@@ -123,7 +122,7 @@ const Header: React.FC = () => {
     );
   }
 
-  if (session) {
+  if (user) {
     left = (
       <div className="left">
         <Link href="/" legacyBehavior>
@@ -153,21 +152,13 @@ const Header: React.FC = () => {
       </div>
     );
 
-    const objectParams = {
-      param1: session.name,
-      param2: session.username,
-    };
-    
-    const queryString = new URLSearchParams(objectParams).toString();
-    console.log(queryString)
     right = (
       <div className="right">
-        <b>
-        {/*TODO eden email*/}
-          {session.name} 
-        </b>
-        <Link href={`/profile/:${session.name}`} legacyBehavior>
+          {user.name} ({user.email})
+        <Link href={`/profile?name=${user.name}&email=${user.email}&username=${user.username}`} legacyBehavior>
+          <button>
             <a>My Profile</a>
+          </button>
         </Link>
         {/* <button onClick={() => setIsDark(!isDark)}>
           <a style={getStyle(isDark)}>{isDark ? "Light Mode" : "Dark Mode"}</a>
@@ -177,9 +168,11 @@ const Header: React.FC = () => {
             <a /*style={getStyle(isDark)}*/>New post</a>
           </button>
         </Link>
-        <button onClick={() => logout()}>
-          <a /*style={getStyle(isDark)}*/>Log out</a>
-        </button>
+        <Link href={`/`} legacyBehavior>
+          <button onClick={() => logout()}>
+            <a /*style={getStyle(isDark)}*/>Log out</a>
+          </button>
+        </Link>
         <style jsx>{`
           a {
             text-decoration: none;

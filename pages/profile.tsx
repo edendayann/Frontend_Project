@@ -1,26 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { GetServerSideProps } from "next";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Layout from "../components/Layout";
 
 // This function retrieves the post data from the database based on the provided id.
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-  console.log("serversideprops:"+params)
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
+  const { name, email, username } = context.query;
+  // You can access the id, email, and username values here and use them as needed
+  
   return {
-    props: {username: params?.userName, name: params?.name},
+    props: {
+      name,
+      email,
+      username,
+    },
   };
 };
 
-
+type Props = {
+  name: string;
+  email: string;
+  username: string;
+};
 
 // // The Post component displays the details of a blog post.
-const Profile: React.FC<{username: string, name: string}> = (user) => {
-
+const Profile: React.FC<Props> = (user) => {
 
   return (
     <Layout>
       <div>
-        <h2>{"hi "+user.name}</h2>
-        <h2>{user.username}</h2>
+        <h2>Welcome {user.name}!</h2>
+        <p>Username: {user.username}</p>
+        <p>Email: {user.email}</p>
       </div>
 
       <style jsx>{`

@@ -6,6 +6,11 @@
     background: rgba(238, 251, 245, 0.864);
     transition: box-shadow 0.1s ease-in;
   }
+
+  .pagination__item--active {
+    background-color: rgb(210, 210, 210);
+    color: #fff;
+  }
   
   .post:hover {
     background-color: #e1fbf2;
