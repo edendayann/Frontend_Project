@@ -193,7 +193,7 @@ app.post('/api/signUp',upload.none(), async (req, res) => {
       })
       .catch(err => {
     if(err.name === 'ValidationError')
-        return res.status(402).json({ message: 'Email is not in a proper format'});
+        return res.status(402).json({ message: 'Email is not in a proper format or already exist'});
     if (err.code === 11000 && err.keyPattern && err.keyPattern.Email)
         return res.status(403).json({ message: 'Email already exists. Please choose a different email.' });
     if (err.code === 11000 && err.keyPattern && err.keyPattern.UserName)

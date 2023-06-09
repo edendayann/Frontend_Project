@@ -141,7 +141,7 @@ const App = () => {
           display: flex;
           border-radius: 0.25rem;
           border: 0.125rem solid rgba(0, 0, 0, 0.2);
-          width: 300px;
+          width: 400px;
           justify-content: center;
           align-items: center;
         }
