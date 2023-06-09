@@ -179,47 +179,54 @@ UserSchema.set('toJSON', {
 }})
 
 app.post('/api/signUp',upload.none(), async (req, res) => {
-    
     const passwordHash = await bcrypt.hash(req.body.password, 10)
-
     const user = new User({
         FullName: req.body.fullName,
         Email: req.body.email,
         UserName: req.body.userName,
         Password: passwordHash,
     })
-
+    //ZOHAR
     user.save()
-        .then(result => {
-            res.status(201).json(result);
-        })
-        .catch(err => {res.status(400).json(err)})
+    .then(result => {
+        res.status(200).json(result);
+      })
+      .catch(err => {
+    if(err.name === 'ValidationError')
+        return res.status(402).json({ message: 'Email is not in a proper format'});
+    if (err.code === 11000 && err.keyPattern && err.keyPattern.Email)
+        return res.status(403).json({ message: 'Email already exists. Please choose a different email.' });
+    if (err.code === 11000 && err.keyPattern && err.keyPattern.UserName)
+        return res.status(400).json({ message: 'UserName already exists. Please choose a different UserName.' });
+    else return res
+     });
 });
+
 
 app.post('/api/login',upload.none(), async (req, res) => {
     const { userName, password } = req.body
-
     const user = await User.findOne({ UserName: userName });
-    const passwordCorrect = user === null
-      ? false
-      : bcrypt.compare(password, user.Password)
-  
-    if (! passwordCorrect) {
-      return res.status(401).json({
-        error: 'invalid username or password'
-      })
-    }
-  
+    //ZOHAR 
+    if (!user)
+        return res.status(404).json({error: 'Invalid username or password - this user does not exist'});
     const userForToken = {
-      userName: user.UserName,
-      id: user._id,
+        userName: user.UserName,
+        id: user._id,
     }
-  
     const token = jwt.sign(userForToken, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTIiLCJuYW1lIjoiem9oYXIgZWRlbiBtYXlhIiwiaWF0IjoxNTE2MjM5MDIyfQ.yStqsP9WD5HmBCNRTdoatO-FgOpWmEhOCIjs7HCLTNc')
+    
+    const passwordCorrect = await bcrypt.compare(password, user.Password);
+    if (!passwordCorrect) 
+        return res.status(401).json({error: 'incorrect credentials'});
+    try{
     await User.updateOne({ UserName: userName },{ $set: { Token: token }});
-    res.status(200)
-       .send({ token, username: user.UserName, name: user.FullName, email: user.Email })
-  })
+    res.status(200).send({ token, username: user.UserName, name: user.FullName, email: user.Email })
+    }
+    catch{
+        return res.status(500).json({error: 'an error ocuured'});
+    }
+})
+
 
 // Start the server
 const server = app.listen(3001, () => {
