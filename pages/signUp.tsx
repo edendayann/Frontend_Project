@@ -12,6 +12,7 @@ const NewUser: React.FC = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');  //ZOHAR
 
  // const titleInputRef = useRef<HTMLInputElement>(null);
  // useEffect(() => {titleInputRef.current?.focus()}, []) 
@@ -19,26 +20,34 @@ const NewUser: React.FC = () => {
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
-//try catch
-    // const body = { fullName, email, userName, password };
-    // const response = await fetch(`/api/uploadUserData`, {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(body),
-    // });
+    setErrorMessage(''); //ZOHAR
+
     const userData = new FormData();
     userData.append('fullName', fullName);
     userData.append('email', email);
     userData.append('userName', userName);
     userData.append('password', password);
     
-    await axios.post('http://localhost:3001/api/signUp', userData, {
-        headers: {
-          'Content-Type' : 'multipart/form-data',
-        },
-    })
-    setLoading(false)
-    await Router.push("/");
+    //ZOHAR
+    try{
+      await axios.post('http://localhost:3001/api/signUp', userData, {
+          headers: {
+            'Content-Type' : 'multipart/form-data',
+          },
+      })
+      setLoading(false)
+      await Router.push("/");
+    }
+    catch (error: any) {
+      setLoading(false);
+      (error.response && error.response.status === 402) ?
+        setErrorMessage('email is not in a proper format') :
+      (error.response && error.response.status === 403) ?
+        setErrorMessage('Email already exists. Please choose a different email.') :
+      (error.response && error.response.status === 400) ?
+        setErrorMessage('UserName already exists. Please choose a different user name.') :
+      console.error('Error:', error);
+    }
   };
 
   const override: CSSProperties = {
@@ -50,7 +59,7 @@ const NewUser: React.FC = () => {
   return (
     <Layout>
       <div>
-        <form onSubmit={submitData}>
+        <form onSubmit={submitData} className="myform">
           <h1>Sign Up</h1>
             <div>
                 <label>Full Name: </label>
@@ -105,9 +114,19 @@ const NewUser: React.FC = () => {
             or Cancel
           </a>
           </div>
+           {/* zohar */}
+           {errorMessage? <a className="alert"> {errorMessage} </a> : ""} 
         </form>
       </div>
       <style jsx>{`
+        .myform {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          height: 60vh;
+        }
+        
         .page {
           background: white;
           padding: 3rem;
@@ -121,13 +140,45 @@ const NewUser: React.FC = () => {
           border: 0;
           padding: 1rem 2rem;
         }
-
+        
+          input[type="text"] {
+          padding: 0.5rem;
+          margin: 0.5rem 0;
+          display: flex;
+          border-radius: 0.25rem;
+          border: 0.125rem solid rgba(0, 0, 0, 0.2);
+          justify-content: center;
+          align-items: center;
+        }
+        
+        .lable{
+          padding: 5px;
+          margin-right: 20px;
+          border: 10;
+          background: black;
+          justify-content: center;
+          align-items: center;
+        }
+        
         button + button {
           margin-left: 1rem;
         }
 
         .back {
           margin-left: 1rem;
+        }
+        
+        .alert {
+          background-color: #f44336;
+          color: white;
+          padding: 5px;
+          margin: 0.5rem 0;
+          display: flex;
+          border-radius: 0.25rem;
+          border: 0.125rem solid rgba(0, 0, 0, 0.2);
+          width: 300px;
+          justify-content: center;
+          align-items: center;
         }
       `}</style>
     </Layout>
