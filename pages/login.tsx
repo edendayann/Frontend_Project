@@ -9,6 +9,8 @@ const App = () => {
   const [userName, setUserName] = useState('') 
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  const [errorMessage, setErrorMessage] = useState('');  //ZOHAR
+
 //   let token = null
 
 //   const setToken = (newToken: string) => {
@@ -40,10 +42,14 @@ const App = () => {
       setLoading(false)
       await Router.push("/");
     } 
-    catch (exception) {
-        //we dont lieke this error
-      setTimeout(() => {
-      }, 5000)
+    //ZOHAR 
+    catch (error : any) {
+      setLoading(false);
+      (error.response && error.response.status === 401) ? 
+        setErrorMessage('incorrect credentials') : 
+      (error.response && error.response.status === 404) ? 
+      setErrorMessage('Invalid username or password- this user does not exist'):
+      console.error('Error:', error); 
     }
   }
 
@@ -56,7 +62,7 @@ const App = () => {
   return (
     <Layout>
       <div>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} className="myform">
           <h1>Login</h1>
             <div>
             <label>User Name: </label>
@@ -91,13 +97,51 @@ const App = () => {
             or Cancel
           </a>
           </div>
+          {/* zohar */}
+          {errorMessage? <a className="alert"> {errorMessage} </a> : ""} 
         </form>
       </div>
       <style jsx>{`
+        .myform {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          height: 60vh;
+        }
+        input[type="text"] {
+          padding: 0.5rem;
+          margin: 0.5rem 0;
+          display: flex;
+          border-radius: 0.25rem;
+          border: 0.125rem solid rgba(0, 0, 0, 0.2);
+          justify-content: center;
+          align-items: center;
+        }
+        .lable{
+          padding: 5px;
+          margin-right: 20px;
+          border: 10;
+          background: black;
+          justify-content: center;
+          align-items: center;
+        }
         .page {
           background: white;
           padding: 3rem;
           display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .alert {
+          background-color: #f44336;
+          color: white;
+          padding: 5px;
+          margin: 0.5rem 0;
+          display: flex;
+          border-radius: 0.25rem;
+          border: 0.125rem solid rgba(0, 0, 0, 0.2);
+          width: 300px;
           justify-content: center;
           align-items: center;
         }
