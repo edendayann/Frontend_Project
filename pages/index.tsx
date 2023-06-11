@@ -90,7 +90,7 @@ const Blog: React.FC<Props> = (props) => {
         </main>
         <b><center>{pageCount === 0 ? "No posts available!" : ""}</center></b>
         <div>
-        <Pagination page={page} pageCount={pageCount} />
+          <Pagination page={page} pageCount={pageCount} />
         </div>
       </div>
      <style jsx>{`

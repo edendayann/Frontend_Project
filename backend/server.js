@@ -42,7 +42,7 @@ mongoose.set('strictQuery', false)
 mongoose.connect(mongoURL)
 
 const mongoSchema = new mongoose.Schema({
-    postID: String, // TODO auto increment if prisma is deleted!
+    id: String, // TODO auto increment if prisma is deleted!
     title: {
         type: String,
         required: true,
@@ -56,8 +56,8 @@ const mongoSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    videoURL: String,
-    user: {
+    video: String,
+    author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
@@ -93,10 +93,10 @@ app.post('/api/uploadMetaData',upload.none(), async (req, res) => {
     const post = new Post({
         title: req.body.title,
         content: req.body.content,
-        user: user.id,
+        author: user.id,
         date: req.body.date,
-        postID: req.body.postID,
-        videoURL: req.body.videoURL,
+        id: req.body.postID,
+        video: req.body.videoURL,
     })
 
     //EDEN: from meni's lecture- save post and update users posts. CHECK
@@ -105,19 +105,13 @@ app.post('/api/uploadMetaData',upload.none(), async (req, res) => {
     await user.save();
 
     res.status(200).json(savedPost);
-    // Save the post to the database
-    // post.save()
-    //     .then(result => {
-    //         res.status(200).json(result);
-    //     })
-    //     .catch(err => {res.status(400).json(err)})
 });
 
 // Route for retrieving a video post by postID
 app.get("/api/video/:postID", async(req, res) => {
     const postID = req.params.postID;
     // Find a post with the given postID
-    const post = await Post.findOne({postID: postID}).exec();
+    const post = await Post.findOne({id: postID}).exec();
     if(!post){
         res.status(200).json("");
         return;
@@ -128,25 +122,53 @@ app.get("/api/video/:postID", async(req, res) => {
 app.post("/api/video", async (req, res) => {
     const postIDs = req.body.postIDs;
     try {
-        const posts = await Post.find({ postID: { $in: postIDs } }).exec();
+        const posts = await Post.find({ id: { $in: postIDs } }).exec();
         if(!posts){
             res.status(200).json("");
             return;
         }
         res.status(200).json(posts);
     } catch (error) {
-        console.error(error);
         res.status(500).json({ error: 'An error occurred while retrieving the video posts.' });
+    }
+  });
+
+  app.post("/api/posts", async (req, res) => {
+    const { published, userName, take, skip } = req.body;
+    let query = Post.find();
+    if(published != undefined)
+        query = query.where({published: Boolean(published)});
+    if (userName)
+        query = query.populate({
+          path: 'author',
+          match: { UserName: userName },
+          select: { name: 1, email: 1, token: 1 }
+        });
+    else
+        query = query.populate('author', { name: 1, email: 1, token: 1 })
+    if (take)
+        query.limit(parseInt(take));
+    if (skip)
+        query.skip(parseInt(skip));
+    try {
+      const posts = await query.exec();
+      if (!posts) {
+        res.status(200).json([]);
+        return;
+      }
+      res.status(200).json(posts);
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred while retrieving the video posts.' });
     }
   });
 
 ////////////////////////////////////  USER  ////////////////////////////////////////
 const UserSchema = new mongoose.Schema({
-    FullName: {
+    name: {
         type: String,
         required: true,
     },
-    Email: {
+    email: {
         type: String,
         required: true,
         unique: true,
@@ -171,35 +193,38 @@ const UserSchema = new mongoose.Schema({
 })
 
 const User = mongoose.model('User', UserSchema)
+
 UserSchema.set('toJSON', {
     transform: (document, returnedObject) => {
       returnedObject.id = returnedObject._id.toString()
       delete returnedObject._id
       delete returnedObject.__v
-}})
+      // the passwordHash should not be revealed
+      delete returnedObject.passwordHash
+    }
+  })
 
 app.post('/api/signUp',upload.none(), async (req, res) => {
     const passwordHash = await bcrypt.hash(req.body.password, 10)
     const user = new User({
-        FullName: req.body.fullName,
-        Email: req.body.email,
+        name: req.body.fullName,
+        email: req.body.email,
         UserName: req.body.userName,
         Password: passwordHash,
     })
     //ZOHAR
-    user.save()
-    .then(result => {
+    try {
+        const result = await user.save();
         res.status(200).json(result);
-      })
-      .catch(err => {
-    if(err.name === 'ValidationError')
-        return res.status(402).json({ message: 'Email is not in a proper format or already exist'});
-    if (err.code === 11000 && err.keyPattern && err.keyPattern.Email)
-        return res.status(403).json({ message: 'Email already exists. Please choose a different email.' });
-    if (err.code === 11000 && err.keyPattern && err.keyPattern.UserName)
-        return res.status(400).json({ message: 'UserName already exists. Please choose a different UserName.' });
-    else return res
-     });
+    } catch (err) {
+        if(err.name === 'ValidationError')
+            return res.status(402).json({ message: 'Email is not in a proper format or already exist'});
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.Email)
+            return res.status(403).json({ message: 'Email already exists. Please choose a different email.' });
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.UserName)
+            return res.status(400).json({ message: 'UserName already exists. Please choose a different UserName.' });
+        else return res
+    };
 });
 
 
@@ -219,8 +244,8 @@ app.post('/api/login',upload.none(), async (req, res) => {
     if (!passwordCorrect) 
         return res.status(401).json({error: 'incorrect credentials'});
     try{
-    await User.updateOne({ UserName: userName },{ $set: { Token: token }});
-    res.status(200).send({ token, username: user.UserName, name: user.FullName, email: user.Email })
+        await User.updateOne({ UserName: userName },{ $set: { Token: token }});
+        res.status(200).send({ token, username: user.UserName, name: user.name, email: user.email })
     }
     catch{
         return res.status(500).json({error: 'an error ocuured'});

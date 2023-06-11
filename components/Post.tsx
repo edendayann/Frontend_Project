@@ -9,9 +9,11 @@ export type PostProps = {
   author: {
     name: string;
     email: string;
+    token: string;
   } | null;
   content: string;
   published: boolean;
+  video: string | undefined;
 };
 
 const Post: React.FC<{ post: PostProps, video: any}> = ({ post, video }) => {

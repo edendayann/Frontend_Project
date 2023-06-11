@@ -10,6 +10,8 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState('');  //ZOHAR
+  const [showPassword, setShowPassword] = useState(false);
+
 
 //   let token = null
 
@@ -22,7 +24,6 @@ const App = () => {
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
-      //console.log("user is logged in:  " +user.name)
       //setToken(user.token)
     }
   }, [])
@@ -45,11 +46,7 @@ const App = () => {
     //ZOHAR 
     catch (error : any) {
       setLoading(false);
-      (error.response && error.response.status === 401) ? 
-        setErrorMessage('incorrect credentials') : 
-      (error.response && error.response.status === 404) ? 
-      setErrorMessage('Invalid username or password- this user does not exist'):
-      console.error('Error:', error); 
+      setErrorMessage('Error: ' + error.response.data.message); 
     }
   }
 
@@ -80,9 +77,15 @@ const App = () => {
                   //  ref={titleInputRef}  
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
-                    type="text"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                 />
+              <input
+                    type= "checkbox"
+                    onChange={(e) => setShowPassword(e.target.checked)}
+                    checked={showPassword}
+                />
+              <label>display password</label>
             </div>
           <div>
           <button
@@ -110,6 +113,15 @@ const App = () => {
           height: 60vh;
         }
         input[type="text"] {
+          padding: 0.5rem;
+          margin: 0.5rem 0;
+          display: flex;
+          border-radius: 0.25rem;
+          border: 0.125rem solid rgba(0, 0, 0, 0.2);
+          justify-content: center;
+          align-items: center;
+        }
+        input[type="password"] {
           padding: 0.5rem;
           margin: 0.5rem 0;
           display: flex;

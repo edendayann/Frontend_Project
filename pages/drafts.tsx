@@ -5,45 +5,57 @@ import Post, { PostProps } from "../components/Post";
 import { useSession, getSession } from "next-auth/react";
 import prisma from '../lib/prisma'
 import axios from "axios";
-import { BiCameraMovie } from 'react-icons/bi';
 
+export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
+  //const session = await getSession({ req });
+  const userName = query.UserName;
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const session = await getSession({ req });
-  if (!session) {
+  if (!userName) {
     res.statusCode = 403;
-    return { props: { drafts: [], videos: [] } };
+    return { props: { drafts: [] } };
   }
-  const drafts = await prisma.post.findMany({
-    where: {
-      author: { email: session.user?.email },
-      published: false,
-    },
-    include: {
-      author: {
-        select: { name: true },
-      },
-    },
-  });
+
+  const response = await axios.post(`http://localhost:3001/api/posts`,{published: false, userName});
+  return { props: { drafts: response.data } };
+
+  // const drafts = await prisma.post.findMany({
+  //   where: {
+  //     author: { email: session.user?.email },
+  //     published: false,
+  //   },
+  //   include: {
+  //     author: {
+  //       select: { name: true },
+  //     },
+  //   },
+  // });
   
-  const postIDs = drafts.map((post) => post.id)
-  const result = await axios.post(`http://localhost:3001/api/video`,{postIDs});
-  if(Array.isArray(result.data))
-    return { props: { drafts: drafts, videos: result.data } };
-  else
-    return { props: { drafts: drafts, videos: [] } };
+ // const postIDs = drafts.map((post) => post.id)
+ // const result = await axios.post(`http://localhost:3001/api/video`,{postIDs});
+  // if(Array.isArray(result.data))
+  //   return { props: { drafts: drafts, videos: result.data } };
+  // else
+  //   return { props: { drafts: drafts, videos: [] } };
 };
 
 type Props = {
   drafts: PostProps[];
-  videos: any[];
+  //logged: boolean
 };
 
-const Drafts: React.FC<Props> = (props) => {
-  const {data: session}= useSession();
-  const {drafts, videos} = props;
 
-  if (!session) {
+const Drafts: React.FC<Props> = (props) => {
+  //const logged = window.localStorage.getItem('loggedNoteappUser')
+  const {drafts} = props;
+  const [user, setUser] = useState<{token: string, username: string, name: string, email: string}>()
+  
+    useEffect(() => {
+      const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+      if (loggedUserJSON)
+        setUser(JSON.parse(loggedUserJSON))
+    }, [])
+//check token fits drafts token?
+  if (!user) {
     return (
       <Layout>
         <h1>My Drafts</h1>
@@ -57,14 +69,16 @@ const Drafts: React.FC<Props> = (props) => {
       <div className="page">
         <h1><center>My Drafts</center></h1>
         <main>
-          {drafts.map((post) => {
-            const video = videos.find(tmp => tmp.postID == post.id)
-            let url ="";
-            if(video)
-              url = video.videoURL;
+          {drafts.length == 0 ? 
+          <b><center>No drafts available!</center></b>
+          : drafts.map((post) => {
+            // const video = videos.find(tmp => tmp.postID == post.id)
+            // let url ="";
+            // if(video)
+            //   url = video.videoURL;
             return (
               <div key={post.id} className="post">
-                <Post post={post}  video={url}  />
+                <Post post={post}  video={post.video}  />
               </div>
             )
           }

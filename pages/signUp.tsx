@@ -13,10 +13,21 @@ const NewUser: React.FC = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');  //ZOHAR
+  const [showPassword, setShowPassword] = useState(false);
+  const [user, setUser] = useState(null)
+
 
  // const titleInputRef = useRef<HTMLInputElement>(null);
  // useEffect(() => {titleInputRef.current?.focus()}, []) 
-
+ useEffect(() => {
+  const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+  if (loggedUserJSON) {
+    const user = JSON.parse(loggedUserJSON)
+    setUser(user)
+    //console.log("user is logged in:  " +user.name)
+    //setToken(user.token)
+  }
+}, [])
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -35,18 +46,16 @@ const NewUser: React.FC = () => {
             'Content-Type' : 'multipart/form-data',
           },
       })
+      const user = (await axios.post('http://localhost:3001/api/login',{userName, password})).data
+      //setToken(user.token)
+      window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user)) 
+      setUser(user)
       setLoading(false)
       await Router.push("/");
     }
     catch (error: any) {
       setLoading(false);
-      (error.response && error.response.status === 402) ?
-        setErrorMessage('email is not in a proper format  or already exist') :
-      (error.response && error.response.status === 403) ?
-        setErrorMessage('Email already exists. Please choose a different email.') :
-      (error.response && error.response.status === 400) ?
-        setErrorMessage('UserName already exists. Please choose a different user name.') :
-      console.error('Error:', error);
+      setErrorMessage('Error: ' + error.response.data.message);
     }
   };
 
@@ -64,7 +73,6 @@ const NewUser: React.FC = () => {
             <div>
                 <label>Full Name: </label>
                 <input
-                    //ref={titleInputRef}  
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Full Name"
                     type="text"
@@ -74,7 +82,6 @@ const NewUser: React.FC = () => {
             <div>
             <label>Email: </label>
                 <input
-                  //  ref={titleInputRef}  
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email"
                     type="text"
@@ -84,7 +91,6 @@ const NewUser: React.FC = () => {
             <div>
             <label>User Name: </label>
                 <input
-                  //  ref={titleInputRef}  
                     onChange={(e) => setUserName(e.target.value)}
                     placeholder="User Name"
                     type="text"
@@ -94,12 +100,17 @@ const NewUser: React.FC = () => {
             <div>
             <label>Password: </label>
                 <input
-                  //  ref={titleInputRef}  
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
-                    type="text"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                 />
+              <input
+                    type= "checkbox"
+                    onChange={(e) => setShowPassword(e.target.checked)}
+                    checked={showPassword}
+                />
+              <label>display password</label>
             </div>
           <div>
           <button
@@ -141,7 +152,16 @@ const NewUser: React.FC = () => {
           padding: 1rem 2rem;
         }
         
-          input[type="text"] {
+        input[type="text"] {
+          padding: 0.5rem;
+          margin: 0.5rem 0;
+          display: flex;
+          border-radius: 0.25rem;
+          border: 0.125rem solid rgba(0, 0, 0, 0.2);
+          justify-content: center;
+          align-items: center;
+        }
+        input[type="password"] {
           padding: 0.5rem;
           margin: 0.5rem 0;
           display: flex;
