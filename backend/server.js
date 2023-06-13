@@ -102,9 +102,10 @@ app.post('/api/upload', parser.single('video'), (req, res) => {
 
 const getTokenFrom = request => {
     const authorization = request.get('Authorization')
+    console.log(authorization);
     if(authorization && authorization.startsWith('Bearer '))
         return authorization.replace('Bearer ','')
-    return null
+    return authorization
 }
 // Route for uploading metadata of a post
 app.post('/api/uploadMetaData',upload.none(), async (req, res) => { 
@@ -154,20 +155,6 @@ app.post("/api/post/delete/:postID", async(req, res) => {
     await Post.deleteOne({ _id: req.params.postID });
     return res.status(200).json("");
 })
-
-// app.post("/api/video", async (req, res) => {
-//     const postIDs = req.body.postIDs;
-//     try {
-//         const posts = await Post.find({ id: { $in: postIDs } }).exec();
-//         if(!posts){
-//             res.status(200).json("");
-//             return;
-//         }
-//         res.status(200).json(posts);
-//     } catch (error) {
-//         res.status(500).json({ error: 'An error occurred while retrieving the video posts.' });
-//     }
-//   });
 
   app.post("/api/posts", async (req, res) => {
     const { published, username, take, skip } = req.body;
@@ -249,13 +236,15 @@ UserSchema.set('toJSON', {
   })
 
 app.post('/api/signUp',upload.none(), async (req, res) => {
+
     const passwordHash = await bcrypt.hash(req.body.password, 10)
     const user = new User({
         name: req.body.fullname,
         email: req.body.email,
         username: req.body.username,
         password: passwordHash,
-    })
+    })        
+
     //ZOHAR
     try {
         const result = await user.save();

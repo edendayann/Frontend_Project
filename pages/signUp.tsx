@@ -1,9 +1,8 @@
 import React, {CSSProperties, useEffect, useRef, useState} from "react";
 import Layout from "../components/Layout";
 import Router from "next/router";
-import {useSession} from "next-auth/react";
 import axios from 'axios';
-import { BarLoader, ClipLoader, PropagateLoader } from 'react-spinners';
+import { BarLoader } from 'react-spinners';
 
 
 const NewUser: React.FC = () => {
@@ -17,17 +16,15 @@ const NewUser: React.FC = () => {
   const [user, setUser] = useState(null)
 
 
- // const titleInputRef = useRef<HTMLInputElement>(null);
- // useEffect(() => {titleInputRef.current?.focus()}, []) 
- useEffect(() => {
-  const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
-  if (loggedUserJSON) {
-    const user = JSON.parse(loggedUserJSON)
-    setUser(user)
-    //console.log("user is logged in:  " +user.name)
-    //setToken(user.token)
-  }
-}, [])
+//  useEffect(() => {
+//   const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+//   if (loggedUserJSON) {
+//     const user = JSON.parse(loggedUserJSON)
+//     setUser(user)
+//     //console.log("user is logged in:  " +user.name)
+//     //setToken(user.token)
+//   }
+// }, [])
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);

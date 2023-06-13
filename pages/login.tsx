@@ -60,7 +60,6 @@ const App = () => {
             <div>
             <label>User Name: </label>
                 <input
-                  //  ref={titleInputRef}  
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="User Name"
                     type="text"
@@ -70,7 +69,6 @@ const App = () => {
             <div>
             <label>Password: </label>
                 <input
-                  //  ref={titleInputRef}  
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                     type={showPassword ? "text" : "password"}

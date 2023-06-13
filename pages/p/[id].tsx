@@ -9,7 +9,7 @@ import { BiCameraMovie } from "react-icons/bi";
 
 async function deletePost(id: number): Promise<void> {
   await axios.post(`http://localhost:3001/api/post/delete/${id}`);
-  await Router.push("/drafts");
+  await Router.push("/");
 }
 
 // This function is used to publish a post by making a PUT request to the server.
