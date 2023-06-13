@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useRouter } from 'next/router';
-import Layout from "./Layout";
 
 type Props = {
     page: number;

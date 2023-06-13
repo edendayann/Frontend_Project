@@ -7,9 +7,9 @@ import { BarLoader, ClipLoader, PropagateLoader } from 'react-spinners';
 
 
 const NewUser: React.FC = () => {
-  const [fullName, setFullName] = useState("");
+  const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
-  const [userName, setUserName] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');  //ZOHAR
@@ -34,9 +34,9 @@ const NewUser: React.FC = () => {
     setErrorMessage(''); //ZOHAR
 
     const userData = new FormData();
-    userData.append('fullName', fullName);
+    userData.append('fullname', fullname);
     userData.append('email', email);
-    userData.append('userName', userName);
+    userData.append('username', username);
     userData.append('password', password);
     
     //ZOHAR
@@ -46,7 +46,7 @@ const NewUser: React.FC = () => {
             'Content-Type' : 'multipart/form-data',
           },
       })
-      const user = (await axios.post('http://localhost:3001/api/login',{userName, password})).data
+      const user = (await axios.post('http://localhost:3001/api/login',{username, password})).data
       //setToken(user.token)
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user)) 
       setUser(user)
@@ -73,10 +73,10 @@ const NewUser: React.FC = () => {
             <div>
                 <label>Full Name: </label>
                 <input
-                    onChange={(e) => setFullName(e.target.value)}
+                    onChange={(e) => setFullname(e.target.value)}
                     placeholder="Full Name"
                     type="text"
-                    value={fullName}
+                    value={fullname}
                 />
             </div>
             <div>
@@ -91,10 +91,10 @@ const NewUser: React.FC = () => {
             <div>
             <label>User Name: </label>
                 <input
-                    onChange={(e) => setUserName(e.target.value)}
+                    onChange={(e) => setUsername(e.target.value)}
                     placeholder="User Name"
                     type="text"
-                    value={userName}
+                    value={username}
                 />
             </div>
             <div>
@@ -114,7 +114,7 @@ const NewUser: React.FC = () => {
             </div>
           <div>
           <button
-            disabled={!fullName || !email || !userName || !password || loading}  // Disable button when form fields are empty or when the form is being submitted
+            disabled={!fullname || !email || !username || !password || loading}  // Disable button when form fields are empty or when the form is being submitted
             onSubmit={submitData}  // Call handleCreateButtonClick when the "Create" button is clicked
           >
             <div>

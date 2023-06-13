@@ -1,22 +1,9 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Router, useRouter } from "next/router";
-//import { ThemeContext } from './ThemeContext';
-
-export const getStyle = (isDark: boolean) => 
-  isDark ?
-    {
-    background: 'black',
-    color: 'white',
-    } : {
-    background: 'rgba(238, 251, 245, 0.864)',
-    color: '#000',
-    }
+import { useRouter } from "next/router";
 
 const Header: React.FC = () => {
- // const [isDark, setIsDark] = useState(false);
   const [user, setUser] = useState<{token: string, username: string, name: string, email: string}>()
-// const {data: user, status} = useuser();
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
@@ -130,7 +117,7 @@ const Header: React.FC = () => {
             Feed
           </a>
         </Link>
-        <Link href="/drafts" as={`/drafts?UserName=${user.username}`} legacyBehavior>
+        <Link href="/drafts" as={`/drafts?username=${user.username}`} legacyBehavior>
           <a data-active={isActive("/drafts")}>My drafts</a>
         </Link>
         <style jsx>{`
@@ -160,17 +147,14 @@ const Header: React.FC = () => {
             <a>My Profile</a>
           </button>
         </Link>
-        {/* <button onClick={() => setIsDark(!isDark)}>
-          <a style={getStyle(isDark)}>{isDark ? "Light Mode" : "Dark Mode"}</a>
-        </button> */}
         <Link href="/create" legacyBehavior>
           <button>
-            <a /*style={getStyle(isDark)}*/>New post</a>
+            <a>New post</a>
           </button>
         </Link>
         <Link href={`/`} legacyBehavior>
           <button onClick={() => logout()}>
-            <a /*style={getStyle(isDark)}*/>Log out</a>
+            <a>Log out</a>
           </button>
         </Link>
         <style jsx>{`
@@ -219,7 +203,6 @@ const Header: React.FC = () => {
   }
 
   return (
-    // <ThemeContext.Provider value={isDark}>
       <nav>
         {left}
         {right}
@@ -231,7 +214,6 @@ const Header: React.FC = () => {
         }
       `}</style>
       </nav>
-    // </ThemeContext.Provider>
 
   );
 };

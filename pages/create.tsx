@@ -1,38 +1,36 @@
 import React, {CSSProperties, useEffect, useRef, useState} from "react";
 import Layout from "../components/Layout";
 import Router from "next/router";
-import {useSession} from "next-auth/react";
 import axios from 'axios';
 import { BarLoader } from 'react-spinners';
-
 
 const Draft: React.FC = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [video, setVideo] = useState<File>(); 
-  const { data: session, status } = useSession();  
-  const [token, setToken] = useState(""); 
-
+  const [user, setUser] = useState<{token: string, username: string, name: string, email: string}>() 
+  
   const videoInput = useRef<HTMLInputElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
-  let email = session?.user?.email;
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    if (loggedUserJSON) 
+      setUser(JSON.parse(loggedUserJSON))
+  }, [])
   
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
+    if(!user){ 
+      setLoading(false)
+      console.error("user is not signed in")
+      return;
+    }
     try {
-      const body = { title, content, session, email };
-      const response = await fetch(`/api/post`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const postData = await response.json();
-      const postID = postData.id
       const metaData = new FormData();
-      metaData.append('postID', postID);
+      metaData.append('username', user.username);
       metaData.append('title', title);
       metaData.append('content', content);
       if (video) {
@@ -48,18 +46,16 @@ const Draft: React.FC = () => {
           .catch(error => console.log(error))
         metaData.append('videoURL', url);
         metaData.append('date', new Date().toString());
-        if(session && session.user && session.user.name)
-          metaData.append('userName', session.user.name);
       }
       await axios.post('http://localhost:3001/api/uploadMetaData', metaData, {
           headers: {
             'Content-Type' : 'multipart/form-data',
+            Authorization: user.token
           },
         })
-      await Router.push("/drafts");
+      await Router.push(`/drafts?username=${user.username}`);
     } catch (error) { console.error(error) }
     setLoading(false)
-
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

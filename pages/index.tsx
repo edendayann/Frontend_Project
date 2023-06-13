@@ -1,75 +1,33 @@
-import React, { useContext } from "react";
+import React from "react";
 import type { GetServerSideProps } from "next";
 import Layout from "../components/Layout";
 import Post, { PostProps } from "../components/Post";
-import prisma from '../lib/prisma'
 import Pagination from "../components/Pagination";
-import { getSession } from "next-auth/react";
 import axios from "axios";
-//import { ThemeContext } from "../components/ThemeContext";
-
-// const isDark = useContext(ThemeContext);
 
 export const getServerSideProps: GetServerSideProps = async ({ query, req }) => {
   const page = parseInt(query.page as string, 10) || 1;
-  const perPage = 10;
-  const skip = (page - 1) * perPage;
-  const session = await getSession({ req });
-
-  const feed = await prisma.post.findMany({
-    take: perPage,
-    skip: skip,
-    where: !session ? { published: true } :
-    {      
-    OR: [
-      { published: true },
-      { published: false,
-        author: { email: session.user?.email },
-      },
-    ],
-    },
-    include: {
-      author: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
-  const count = await prisma.post.count({ where: !session ? { published: true } :
-    {      
-    OR: [
-      { published: true },
-      { published: false,
-        author: { email: session.user?.email },
-      },
-    ],
-    }
-  });
-
-  const postIDs = feed.map((post) => post.id)
-  const videos = (await axios.post(`http://localhost:3001/api/video`,{postIDs})).data;
+  const take = 10;
+  const skip = (page - 1) * take;
+  const response = await axios.post(`http://localhost:3001/api/posts`,{skip, take, published: true});
 
   return {
     props: {
-      feed,
-      videos,
+      feed: response.data.posts,
       page,
-      pageCount: Math.ceil(count / perPage),
+      pageCount: Math.ceil(response.data.count / take),
     },
   };
 };
 
 type Props = {
   feed: PostProps[];
-  videos: any[];
   page: number;
   pageCount: number;
 };
 
 const Blog: React.FC<Props> = (props) => {
-  const { feed, videos, page, pageCount } = props;
+  const { feed, page, pageCount } = props;
 
   return (
     <Layout>
@@ -77,13 +35,9 @@ const Blog: React.FC<Props> = (props) => {
         <h1><center>Public Feed</center></h1>
         <main>
           {feed.map((post) => {
-            const video = videos.find(tmp => tmp.postID == post.id)
-            let url ="";
-            if(video)
-              url = video.videoURL;
             return (
               <div key={post.id} className="post">
-                <Post post={post}  video={url}  />
+                <Post post={post}  video={post.video}  />
               </div>
             )
           } )}

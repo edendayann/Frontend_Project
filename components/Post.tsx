@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import Router, { useRouter } from "next/router";
+import React from "react";
+import Router from "next/router";
 import ReactMarkdown from "react-markdown";
 import { BiCameraMovie } from "react-icons/bi";
 
@@ -24,7 +24,7 @@ const Post: React.FC<{ post: PostProps, video: any}> = ({ post, video }) => {
       <h2>{post.title}</h2>
       <small>By {authorName}</small>
       <ReactMarkdown children={post.content}/>
-      {video != "" ? (
+      {video ? (
                     <a href={video} target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>
                       <BiCameraMovie style={{ fontSize: '30px' , color: 'black'}} />
                     </a>

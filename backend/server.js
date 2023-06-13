@@ -7,7 +7,9 @@ require('dotenv').config();
 const cors = require('cors');
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const usersRouter = express.Router()
+// const autoIncrement = require('mongoose-auto-increment');
+// autoIncrement.initialize(mongoose.connection);
+
 
 const app = express();
 app.use(cors());
@@ -42,7 +44,10 @@ mongoose.set('strictQuery', false)
 mongoose.connect(mongoURL)
 
 const mongoSchema = new mongoose.Schema({
-    id: String, // TODO auto increment if prisma is deleted!
+    // id: {
+    //     type: Number,
+    //     unique: true
+    // },
     title: {
         type: String,
         required: true,
@@ -62,6 +67,14 @@ const mongoSchema = new mongoose.Schema({
         ref: 'User'
     },
 })
+
+// mongoSchema.plugin(autoIncrement.plugin, {
+//     model: 'Post',
+//     field: 'id',
+//     startAt: 1, // The initial value for the auto-incrementing field
+//     incrementBy: 1, // The increment value for each new document
+//   });
+  
 
 // Creates a Mongoose model named Post based on the defined schema
 const Post = mongoose.model('Post', mongoSchema)
@@ -87,80 +100,111 @@ app.post('/api/upload', parser.single('video'), (req, res) => {
         .catch(error => res.status(500).json({ message: 'Video upload failed, with this error: ' + error }))
 });
 
+const getTokenFrom = request => {
+    const authorization = request.get('Authorization')
+    if(authorization && authorization.startsWith('Bearer '))
+        return authorization.replace('Bearer ','')
+    return null
+}
 // Route for uploading metadata of a post
-app.post('/api/uploadMetaData',upload.none(), async (req, res) => {
-    const user = await User.findOne({ UserName: req.body.userName }); //TODO can be found by id- change create.tsx
+app.post('/api/uploadMetaData',upload.none(), async (req, res) => { 
+    const decodedToken = jwt.verify(getTokenFrom(req), process.env.SECRET)
+    if(!decodedToken.id)
+        return res.status(401).json({ error: 'Token invalid' })
+    const user = await User.findById(decodedToken.id)
     const post = new Post({
         title: req.body.title,
         content: req.body.content,
         author: user.id,
         date: req.body.date,
-        id: req.body.postID,
+        //id: req.body.postID,
         video: req.body.videoURL,
     })
 
-    //EDEN: from meni's lecture- save post and update users posts. CHECK
     const savedPost = await post.save();
-    user.Posts = user.Posts.concat(savedPost._id);
+    user.posts = user.posts.concat(savedPost._id);
     await user.save();
 
     res.status(200).json(savedPost);
 });
 
-// Route for retrieving a video post by postID
-app.get("/api/video/:postID", async(req, res) => {
+// Route for retrieving a post by postID
+app.get("/api/post/:postID", async(req, res) => {
     const postID = req.params.postID;
     // Find a post with the given postID
-    const post = await Post.findOne({id: postID}).exec();
-    if(!post){
-        res.status(200).json("");
-        return;
+    const response = Post.findOne();
+    response.where({_id: postID})
+    response.populate('author', { name: 1, email: 1, token: 1 })
+    try{
+        const post = await response.exec();
+        return res.status(200).json(post);
+    } catch {
+        return res.status(400).json({message: 'not identified- '+ err})
     }
-    res.status(200).json(post);
 })
 
-app.post("/api/video", async (req, res) => {
-    const postIDs = req.body.postIDs;
-    try {
-        const posts = await Post.find({ id: { $in: postIDs } }).exec();
-        if(!posts){
-            res.status(200).json("");
-            return;
-        }
-        res.status(200).json(posts);
-    } catch (error) {
-        res.status(500).json({ error: 'An error occurred while retrieving the video posts.' });
-    }
-  });
+app.post("/api/post/publish/:postID", async(req, res) => {
+    const post = await Post.findOne({_id: req.params.postID});
+    post.published = true;
+    await post.save();
+    return res.status(200).json("");
+})
+
+app.post("/api/post/delete/:postID", async(req, res) => {
+    await Post.deleteOne({ _id: req.params.postID });
+    return res.status(200).json("");
+})
+
+// app.post("/api/video", async (req, res) => {
+//     const postIDs = req.body.postIDs;
+//     try {
+//         const posts = await Post.find({ id: { $in: postIDs } }).exec();
+//         if(!posts){
+//             res.status(200).json("");
+//             return;
+//         }
+//         res.status(200).json(posts);
+//     } catch (error) {
+//         res.status(500).json({ error: 'An error occurred while retrieving the video posts.' });
+//     }
+//   });
 
   app.post("/api/posts", async (req, res) => {
-    const { published, userName, take, skip } = req.body;
+    const { published, username, take, skip } = req.body;
     let query = Post.find();
-    if(published != undefined)
+    let resCount = Post.countDocuments();
+    if(published != undefined){
         query = query.where({published: Boolean(published)});
-    if (userName)
+        resCount = resCount.where({ published: Boolean(published) });
+    }
+    if (username)
         query = query.populate({
           path: 'author',
-          match: { UserName: userName },
+          match: { username: username },
           select: { name: 1, email: 1, token: 1 }
         });
     else
         query = query.populate('author', { name: 1, email: 1, token: 1 })
     if (take)
-        query.limit(parseInt(take));
+        query = query.limit(parseInt(take));
     if (skip)
-        query.skip(parseInt(skip));
+        query = query.skip(parseInt(skip));
     try {
       const posts = await query.exec();
+      const count = await resCount.exec();
       if (!posts) {
         res.status(200).json([]);
         return;
       }
-      res.status(200).json(posts);
+      res.status(200).json({posts: posts, count: count});
     } catch (error) {
       res.status(500).json({ error: 'An error occurred while retrieving the video posts.' });
     }
   });
+
+  app.post("/api/posts", async (req, res) => {
+    await Post.countDocuments({ published: true });
+  })
 
 ////////////////////////////////////  USER  ////////////////////////////////////////
 const UserSchema = new mongoose.Schema({
@@ -174,22 +218,22 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         match: /^[\w-]+(\.[\w-]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7}$/
     },
-    UserName: {
+    username: {
         type: String,
         required: true,
         unique: true
     },
-    Password: {
+    password: {
         type: String,
         required: true,
     },
-    Posts: [
+    posts: [
         {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Post'
         }
       ],
-    Token: String,
+    token: String,
 })
 
 const User = mongoose.model('User', UserSchema)
@@ -207,45 +251,47 @@ UserSchema.set('toJSON', {
 app.post('/api/signUp',upload.none(), async (req, res) => {
     const passwordHash = await bcrypt.hash(req.body.password, 10)
     const user = new User({
-        name: req.body.fullName,
+        name: req.body.fullname,
         email: req.body.email,
-        UserName: req.body.userName,
-        Password: passwordHash,
+        username: req.body.username,
+        password: passwordHash,
     })
     //ZOHAR
     try {
         const result = await user.save();
         res.status(200).json(result);
     } catch (err) {
-        if(err.name === 'ValidationError')
-            return res.status(402).json({ message: 'Email is not in a proper format or already exist'});
-        if (err.code === 11000 && err.keyPattern && err.keyPattern.Email)
-            return res.status(403).json({ message: 'Email already exists. Please choose a different email.' });
-        if (err.code === 11000 && err.keyPattern && err.keyPattern.UserName)
-            return res.status(400).json({ message: 'UserName already exists. Please choose a different UserName.' });
-        else return res
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.email)
+            res.status(403).json({ message: 'Email already exists. Please choose a different email.' });
+        else if (err.code === 11000 && err.keyPattern && err.keyPattern.useruame)
+            res.status(400).json({ message: 'UserName already exists. Please choose a different UserName.' });
+        else if(err.name === 'ValidationError' && err.errors.email)
+            res.status(402).json({ message: 'Email is not in a proper format or already exist'});
+        else
+            res.status(400).json({message: 'not identified- '+ err})
     };
+    return;
 });
 
 
 app.post('/api/login',upload.none(), async (req, res) => {
-    const { userName, password } = req.body
-    const user = await User.findOne({ UserName: userName });
-    //ZOHAR 
+    const { username, password } = req.body
+    const user = await User.findOne({ username: username });
     if (!user)
-        return res.status(404).json({error: 'Invalid username or password - this user does not exist'});
+        return res.status(404).json({message: 'User does not exist'});
+
     const userForToken = {
-        userName: user.UserName,
+        username: user.username,
         id: user._id,
     }
-    const token = jwt.sign(userForToken, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTIiLCJuYW1lIjoiem9oYXIgZWRlbiBtYXlhIiwiaWF0IjoxNTE2MjM5MDIyfQ.yStqsP9WD5HmBCNRTdoatO-FgOpWmEhOCIjs7HCLTNc')
+    const token = jwt.sign(userForToken, process.env.SECRET)
     
-    const passwordCorrect = await bcrypt.compare(password, user.Password);
+    const passwordCorrect = await bcrypt.compare(password, user.password);
     if (!passwordCorrect) 
         return res.status(401).json({error: 'incorrect credentials'});
     try{
-        await User.updateOne({ UserName: userName },{ $set: { Token: token }});
-        res.status(200).send({ token, username: user.UserName, name: user.name, email: user.email })
+        await User.updateOne({ username: username },{ $set: { token: token }});
+        res.status(200).send({ token, username: user.username, name: user.name, email: user.email })
     }
     catch{
         return res.status(500).json({error: 'an error ocuured'});

@@ -6,25 +6,22 @@ import { BarLoader } from 'react-spinners';
 
 const App = () => {
   const [loading, setLoading] = useState(false);
-  const [userName, setUserName] = useState('') 
+  const [username, setUsername] = useState('') 
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [errorMessage, setErrorMessage] = useState('');  //ZOHAR
+  const [errorMessage, setErrorMessage] = useState(''); 
   const [showPassword, setShowPassword] = useState(false);
 
-
-//   let token = null
-
-//   const setToken = (newToken: string) => {
-//     token = `Bearer ${newToken}`
-//   }
+  let token = null
+  const setToken = (newToken: string) => {
+    token = `Bearer ${newToken}`
+  }
   
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
-      //setToken(user.token)
     }
   }, [])
 
@@ -33,17 +30,16 @@ const App = () => {
     e.preventDefault()
     setLoading(true)
     try {
-      const user = (await axios.post('http://localhost:3001/api/login',{userName, password})).data
-      //setToken(user.token)
+      const user = (await axios.post('http://localhost:3001/api/login',{username, password})).data
+      setToken(user.token)
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user)) 
-      //TODO- check if needed
+      //TODO: check if needed
       setUser(user)
-    //   setUsername('')
-    //   setPassword('')
+      setUsername('')
+      setPassword('')
       setLoading(false)
       await Router.push("/");
     } 
-    //ZOHAR 
     catch (error : any) {
       setLoading(false);
       setErrorMessage('Error: ' + error.response.data.message); 
@@ -65,10 +61,10 @@ const App = () => {
             <label>User Name: </label>
                 <input
                   //  ref={titleInputRef}  
-                    onChange={(e) => setUserName(e.target.value)}
+                    onChange={(e) => setUsername(e.target.value)}
                     placeholder="User Name"
                     type="text"
-                    value={userName}
+                    value={username}
                 />
             </div>
             <div>
@@ -89,7 +85,7 @@ const App = () => {
             </div>
           <div>
           <button
-            disabled={ !userName || !password || loading}  // Disable button when form fields are empty or when the form is being submitted
+            disabled={ !username || !password || loading}  // Disable button when form fields are empty or when the form is being submitted
             onSubmit={handleLogin}  // Call handleCreateButtonClick when the "Create" button is clicked
           >
             <div>
