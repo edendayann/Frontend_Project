@@ -4,7 +4,6 @@ import Router from "next/router";
 import axios from 'axios';
 import { BarLoader } from 'react-spinners';
 
-
 const NewUser: React.FC = () => {
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
@@ -13,8 +12,9 @@ const NewUser: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');  //ZOHAR
   const [showPassword, setShowPassword] = useState(false);
-  const [user, setUser] = useState(null)
+  const [profileImage, setProfileImage] = useState<File>(); 
 
+  const imageInput = useRef<HTMLInputElement>(null);
 
 //  useEffect(() => {
 //   const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
@@ -35,7 +35,19 @@ const NewUser: React.FC = () => {
     userData.append('email', email);
     userData.append('username', username);
     userData.append('password', password);
-    
+
+    if (profileImage) {
+      let url = '';
+      const imageFile = new FormData();
+      imageFile.append('image', profileImage, profileImage.name);
+      await axios.post('http://localhost:3001/api/uploadPicture', imageFile, {
+        headers: {
+          'Content-Type' : 'multipart/form-data',
+        },
+      }).then(result =>  url = result.data.url)
+        .catch(error => console.log(error)) 
+      userData.append('imageURL', url);
+    }
     //ZOHAR
     try{
       await axios.post('http://localhost:3001/api/signUp', userData, {
@@ -46,16 +58,21 @@ const NewUser: React.FC = () => {
       const user = (await axios.post('http://localhost:3001/api/login',{username, password})).data
       //setToken(user.token)
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user)) 
-      setUser(user)
       setLoading(false)
       await Router.push("/");
     }
     catch (error: any) {
       setLoading(false);
-      setErrorMessage('Error: ' + error.response.data.message);
+      setErrorMessage('Error: ' + error.response?.data?.message);
     }
   };
 
+  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) 
+      setProfileImage(files[0]);
+  };
+  
   const override: CSSProperties = {
     display: "block",
     margin: "10 auto",
@@ -81,7 +98,7 @@ const NewUser: React.FC = () => {
                 <input
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email"
-                    type="text"
+                    type="email"
                     value={email}
                 />
             </div>
@@ -109,10 +126,31 @@ const NewUser: React.FC = () => {
                 />
               <label>display password</label>
             </div>
+          
           <div>
+          <label>Add profile image: </label>
+            <input
+              type="file"
+              disabled = {profileImage ? true : false}
+              id="imageUpload"
+              name="imageUpload"
+              onChange={handleImage}
+              ref={imageInput}
+              accept="image/*"
+            />
+            <button
+              disabled = {!profileImage}
+              onClick={() => {setProfileImage(undefined); if(imageInput.current) imageInput.current.value = ""}}
+            >
+              Reset Image
+            </button>
+        </div>
+        <div>
+
           <button
             disabled={!fullname || !email || !username || !password || loading}  // Disable button when form fields are empty or when the form is being submitted
-            onSubmit={submitData}  // Call handleCreateButtonClick when the "Create" button is clicked
+            onSubmit={submitData}
+            type= "submit"  // Call handleCreateButtonClick when the "Create" button is clicked
           >
             <div>
               {loading? <BarLoader color="black" loading={loading} cssOverride={override} /> : 'Sign Me Up!'}
@@ -142,23 +180,8 @@ const NewUser: React.FC = () => {
           justify-content: center;
           align-items: center;
         }
-
-        input[type="submit"] {
-          background: #ececec;
-          border: 0;
-          padding: 1rem 2rem;
-        }
         
-        input[type="text"] {
-          padding: 0.5rem;
-          margin: 0.5rem 0;
-          display: flex;
-          border-radius: 0.25rem;
-          border: 0.125rem solid rgba(0, 0, 0, 0.2);
-          justify-content: center;
-          align-items: center;
-        }
-        input[type="password"] {
+        input[type="text"], input[type="password"], input[type="email"], input[type="file"]{
           padding: 0.5rem;
           margin: 0.5rem 0;
           display: flex;

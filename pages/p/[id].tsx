@@ -58,6 +58,7 @@ const Post: React.FC<Props> = (props) => {
   return (
     <Layout>
       <div>
+        <a>
         <h2>{title}</h2>
         <p>By {post?.author?.name || "Unknown author"}</p>
         <ReactMarkdown children={post.content} />
@@ -66,6 +67,8 @@ const Post: React.FC<Props> = (props) => {
                       <BiCameraMovie style={{ fontSize: '30px' , color: 'black'}} />
                     </a>
                 ) : "No video"}
+        </a>
+        {post.author?.imageURL && post.author?.imageURL != "" ? <img src={post.author?.imageURL} alt="cannot to load photo" className="image"></img> : ""}
         <p>
           {!post.published && user && postBelongsToUser && (
             <button onClick={() => publishPost(post.id)}>Publish</button>
@@ -82,6 +85,12 @@ const Post: React.FC<Props> = (props) => {
           transition: box-shadow 0.1s ease-in;
           box-shadow: 1px 1px 3px #aaa;
           padding: 1rem;
+        }
+        .image{
+          width: auto; 
+          height: 150px;
+          margin-left: auto;
+          float: right;
         }
         .page {
           background: white;

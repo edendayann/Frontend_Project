@@ -9,7 +9,7 @@ const Draft: React.FC = () => {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [video, setVideo] = useState<File>(); 
-  const [user, setUser] = useState<{token: string, username: string, name: string, email: string}>() 
+  const [user, setUser] = useState<{token: string, username: string, name: string, email: string, imageURL: string}>() 
   
   const videoInput = useRef<HTMLInputElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +37,7 @@ const Draft: React.FC = () => {
         let url = '';
         const videoFile = new FormData();
         videoFile.append('video', video, video.name);
-        videoFile.append('upload_preset', 'xgg6txjv');
+        // videoFile.append('upload_preset', 'xgg6txjv');
         await axios.post('http://localhost:3001/api/upload', videoFile, {
           headers: {
             'Content-Type' : 'multipart/form-data',

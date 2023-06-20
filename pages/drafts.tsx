@@ -23,7 +23,7 @@ type Props = {
 
 const Drafts: React.FC<Props> = (props) => {
   const {drafts, count} = props;
-  const [user, setUser] = useState<{token: string, username: string, name: string, email: string}>()
+  const [user, setUser] = useState<{token: string, username: string, name: string, email: string, imageURL: string}>()
   
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')

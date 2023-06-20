@@ -10,7 +10,6 @@ const jwt = require('jsonwebtoken')
 // const autoIncrement = require('mongoose-auto-increment');
 // autoIncrement.initialize(mongoose.connection);
 
-
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -29,9 +28,9 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        resource_type: 'video',
+      resource_type: ['video', 'image'],
     },
-});
+  });
 
 // Create multer instance with a disk storage configuration
 const parser = multer({
@@ -85,6 +84,31 @@ mongoSchema.set('toJSON', {
       delete returnedObject.__v
 }})
 
+// Route for profile picture upload - ZOAHR
+app.post('/api/uploadPicture', upload.single('image'), (req, res) => {
+    const result = async () => {
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+            resource_type: "image",
+        });
+        return { url: uploadResult.url };
+    };
+    result()
+        .then(async result => {
+            const email = req.body.email
+            if(email){ // not a new user
+                const user = await User.findOne({ email: email });
+                if(user){
+                    user.imageURL = result.url;
+                    await user.save();
+                    return res.status(200).json(result.url);
+                }
+                return res.status(403).json("email not valid");
+            }
+            return res.status(200).json(result);
+        })
+        .catch(error => res.status(500).json({ message: 'Image upload failed, with this error: ' + error }));
+  });
+
 // Route for handling file uploads to Cloudinary
 app.post('/api/upload', parser.single('video'), (req, res) => {
     const result = async () => {
@@ -102,14 +126,13 @@ app.post('/api/upload', parser.single('video'), (req, res) => {
 
 const getTokenFrom = request => {
     const authorization = request.get('Authorization')
-    console.log(authorization);
     if(authorization && authorization.startsWith('Bearer '))
         return authorization.replace('Bearer ','')
     return authorization
 }
 // Route for uploading metadata of a post
 app.post('/api/uploadMetaData',upload.none(), async (req, res) => { 
-    const decodedToken = jwt.verify(getTokenFrom(req), process.env.SECRET)
+    const decodedToken = jwt.verify(getTokenFrom(req), 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTIiLCJuYW1lIjoiem9oYXIgZWRlbiBtYXlhIiwiaWF0IjoxNTE2MjM5MDIyfQ.yStqsP9WD5HmBCNRTdoatO-FgOpWmEhOCIjs7HCLTNc')
     if(!decodedToken.id)
         return res.status(401).json({ error: 'Token invalid' })
     const user = await User.findById(decodedToken.id)
@@ -135,7 +158,7 @@ app.get("/api/post/:postID", async(req, res) => {
     // Find a post with the given postID
     const response = Post.findOne();
     response.where({_id: postID})
-    response.populate('author', { name: 1, email: 1, token: 1 })
+    response.populate('author', { name: 1, email: 1, token: 1, imageURL: 1 })
     try{
         const post = await response.exec();
         return res.status(200).json(post);
@@ -156,6 +179,15 @@ app.post("/api/post/delete/:postID", async(req, res) => {
     return res.status(200).json("");
 })
 
+app.post("/api/resetPicture/:email", async(req, res) => {
+    const user = await User.findOne({email: req.params.email});
+    if(user){
+        user.imageURL = undefined;
+        await user.save();
+    }
+    return res.status(200).json("");
+})
+
   app.post("/api/posts", async (req, res) => {
     const { published, username, take, skip } = req.body;
     let query = Post.find();
@@ -168,10 +200,10 @@ app.post("/api/post/delete/:postID", async(req, res) => {
         query = query.populate({
           path: 'author',
           match: { username: username },
-          select: { name: 1, email: 1, token: 1 }
+          select: { name: 1, email: 1, token: 1, imageURL: 1 }
         });
     else
-        query = query.populate('author', { name: 1, email: 1, token: 1 })
+        query = query.populate('author', { name: 1, email: 1, token: 1, imageURL: 1 })
     if (take)
         query = query.limit(parseInt(take));
     if (skip)
@@ -214,6 +246,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    imageURL: {
+        type: String,
+        required: false,
+    },
     posts: [
         {
           type: mongoose.Schema.Types.ObjectId,
@@ -236,15 +272,14 @@ UserSchema.set('toJSON', {
   })
 
 app.post('/api/signUp',upload.none(), async (req, res) => {
-
     const passwordHash = await bcrypt.hash(req.body.password, 10)
     const user = new User({
         name: req.body.fullname,
         email: req.body.email,
         username: req.body.username,
         password: passwordHash,
+        imageURL: req.body.imageURL,
     })        
-
     //ZOHAR
     try {
         const result = await user.save();
@@ -273,14 +308,14 @@ app.post('/api/login',upload.none(), async (req, res) => {
         username: user.username,
         id: user._id,
     }
-    const token = jwt.sign(userForToken, process.env.SECRET)
+    const token = jwt.sign(userForToken,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTIiLCJuYW1lIjoiem9oYXIgZWRlbiBtYXlhIiwiaWF0IjoxNTE2MjM5MDIyfQ.yStqsP9WD5HmBCNRTdoatO-FgOpWmEhOCIjs7HCLTNc')
     
     const passwordCorrect = await bcrypt.compare(password, user.password);
     if (!passwordCorrect) 
         return res.status(401).json({error: 'incorrect credentials'});
     try{
         await User.updateOne({ username: username },{ $set: { token: token }});
-        res.status(200).send({ token, username: user.username, name: user.name, email: user.email })
+        res.status(200).send({ token, username: user.username, name: user.name, email: user.email, imageURL: user.imageURL })
     }
     catch{
         return res.status(500).json({error: 'an error ocuured'});

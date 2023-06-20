@@ -3,14 +3,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 const Header: React.FC = () => {
-  const [user, setUser] = useState<{token: string, username: string, name: string, email: string}>()
-
+  const [user, setUser] = useState<{ username: string, name: string, email: string,  imageURL: string}>()
+  
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
       setUser(JSON.parse(loggedUserJSON))
-      if(user)
-        console.log("user is logged11 in:  " +user.name)
     }
   }, [])
 
@@ -138,11 +136,11 @@ const Header: React.FC = () => {
         `}</style>
       </div>
     );
-
+    
     right = (
       <div className="right">
           {user.name} ({user.email})
-        <Link href={`/profile?name=${user.name}&email=${user.email}&username=${user.username}`} legacyBehavior>
+        <Link href={`/profile?name=${user.name}&email=${user.email}&username=${user.username}&imageURL=${user.imageURL}`} legacyBehavior>
           <button>
             <a>My Profile</a>
           </button>

@@ -10,6 +10,7 @@ export type PostProps = {
     name: string;
     email: string;
     token: string;
+    imageURL: string;
   } | null;
   content: string;
   published: boolean;
@@ -21,6 +22,7 @@ const Post: React.FC<{ post: PostProps, video: any}> = ({ post, video }) => {
 
     return (
     <div onClick={() => Router.push(`/p/${post.id}`)}>
+      <a>
       <h2>{post.title}</h2>
       <small>By {authorName}</small>
       <ReactMarkdown children={post.content}/>
@@ -29,10 +31,29 @@ const Post: React.FC<{ post: PostProps, video: any}> = ({ post, video }) => {
                       <BiCameraMovie style={{ fontSize: '30px' , color: 'black'}} />
                     </a>
                 ) : "No video"}
+      </a>
+      {post.author?.imageURL && post.author?.imageURL != "" ? <img src={post.author?.imageURL} alt="cannot to load photo" className="image"></img> : ""}
       <style jsx>{`
         div {
           color: inherit;
           padding: 2rem;
+        }
+        .image{
+          width: auto; 
+          height: 150px;
+          margin-left: auto;
+          float: right;
+        }
+        a {
+          text-decoration: none;
+          color: #000;
+          background: transpparent;
+          display: inline-block;
+        }
+        
+        a + a {
+          margin-left: 1rem;
+          background: transparent;
         }
       `}</style>
     </div>
