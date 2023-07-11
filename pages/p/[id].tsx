@@ -59,6 +59,7 @@ const Post: React.FC<Props> = (props) => {
     <Layout>
       <div>
         <a>
+        <span>
         <h2>{title}</h2>
         <p>By {post?.author?.name || "Unknown author"}</p>
         <ReactMarkdown children={post.content} />
@@ -67,6 +68,7 @@ const Post: React.FC<Props> = (props) => {
                       <BiCameraMovie style={{ fontSize: '30px' , color: 'black'}} />
                     </a>
                 ) : "No video"}
+        </span>
         </a>
         {post.author?.imageURL && post.author?.imageURL != "" ? <img src={post.author?.imageURL} alt="cannot to load photo" className="image"></img> : ""}
         <p>

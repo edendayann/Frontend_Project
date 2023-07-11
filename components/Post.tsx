@@ -22,7 +22,7 @@ const Post: React.FC<{ post: PostProps, video: any}> = ({ post, video }) => {
 
     return (
     <div onClick={() => Router.push(`/p/${post.id}`)}>
-      <a>
+      <div>
       <h2>{post.title}</h2>
       <small>By {authorName}</small>
       <ReactMarkdown children={post.content}/>
@@ -31,8 +31,8 @@ const Post: React.FC<{ post: PostProps, video: any}> = ({ post, video }) => {
                       <BiCameraMovie style={{ fontSize: '30px' , color: 'black'}} />
                     </a>
                 ) : "No video"}
-      </a>
-      {post.author?.imageURL && post.author?.imageURL != "" ? <img src={post.author?.imageURL} alt="cannot to load photo" className="image"></img> : ""}
+      {post.author?.imageURL && post.author?.imageURL != "" ? (<img src={post.author?.imageURL} alt="cannot to load photo" className="image"></img>) : ""}
+      </div>
       <style jsx>{`
         div {
           color: inherit;
@@ -43,14 +43,14 @@ const Post: React.FC<{ post: PostProps, video: any}> = ({ post, video }) => {
           height: 150px;
           margin-left: auto;
           float: right;
+          margin-top: -8rem;
         }
-        a {
+        .a {
           text-decoration: none;
           color: #000;
           background: transpparent;
           display: inline-block;
         }
-        
         a + a {
           margin-left: 1rem;
           background: transparent;

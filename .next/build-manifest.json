@@ -30,15 +30,20 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/create": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/create.js"
+    ],
     "/drafts": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/drafts.js"
     ],
-    "/p/[id]": [
+    "/signUp": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/p/[id].js"
+      "static/chunks/pages/signUp.js"
     ]
   },
   "ampFirstPages": []

@@ -106,7 +106,7 @@ const Profile: React.FC = () => {
               >
                 Reset Image
             </button> :
-            <a> 
+            <div> 
               <label>Add profile image: </label>
               <input
                 type="file"
@@ -120,7 +120,7 @@ const Profile: React.FC = () => {
                 disabled={!profileImage}  // Disable button when form fields are empty or when the form is being submitted
                 onClick={handleSubmit}  // Call handleCreateButtonClick when the "Create" button is clicked
               >Upload</button>
-            </a>}
+            </div>}
       </div>
       <style jsx>{`
         div {
