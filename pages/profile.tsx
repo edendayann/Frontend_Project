@@ -3,47 +3,24 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Layout from "../components/Layout";
 import axios from "axios";
 import { userAgent } from "next/server";
+import Cookies from "js-cookie";
 
-// This function retrieves the post data from the database based on the provided id.
-// export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
-//   const { name, email, username , imageURL } = context.query;
-//   // You can access the id, email, and username values here and use them as needed
-  
-//   return {
-//     props: {
-//       name,
-//       email,
-//       username,
-//       imageURL,
-//     },
-//   };
-// };
-
-// type Props = {
-//   name: string;
-//   email: string;
-//   username: string;
-//   imageURL: string,
-// };
-
-// // The Post component displays the details of a blog post.
 const Profile: React.FC = () => {
   const [user, setUser] = useState<{ username: string, name: string, email: string,  imageURL: string } >({ username: '', name: '', email: '', imageURL: '' })
   const [profileImage, setProfileImage] = useState<File>(); 
-  //const [url, setURL] = useState("")
   const imageInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    const loggedUserJSON = Cookies.get("loggedNoteappUser");
     if (loggedUserJSON) {
       setUser(JSON.parse(loggedUserJSON))
       
     }
   }, [])
 
-  useEffect(() =>
-    window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
-  ,[user])
+  useEffect(() => {
+    Cookies.set("loggedNoteappUser", JSON.stringify(user));
+  }, [user]);
 
   if (!user) {
     return (

@@ -3,6 +3,7 @@ import Layout from "../components/Layout";
 import Router from "next/router";
 import axios from 'axios';
 import { BarLoader } from 'react-spinners';
+import Cookies from "js-cookie";
 
 const Draft: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -15,7 +16,7 @@ const Draft: React.FC = () => {
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    const loggedUserJSON = Cookies.get("loggedNoteappUser");
     if (loggedUserJSON) 
       setUser(JSON.parse(loggedUserJSON))
   }, [])

@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import Cookies from "js-cookie";
 
 const Header: React.FC = () => {
   const [user, setUser] = useState<{ username: string, name: string, email: string,  imageURL: string}>()
   
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    const loggedUserJSON = Cookies.get("loggedNoteappUser");
     if (loggedUserJSON) {
       setUser(JSON.parse(loggedUserJSON))
     }
   }, [])
 
   const logout = () => {
-    window.localStorage.removeItem('loggedNoteappUser');
+    Cookies.remove("loggedNoteappUser");
     setUser(undefined);
   }
 

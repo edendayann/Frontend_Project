@@ -40,10 +40,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/drafts.js"
     ],
-    "/signUp": [
+    "/login": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/signUp.js"
+      "static/chunks/pages/login.js"
+    ],
+    "/p/[id]": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/p/[id].js"
     ]
   },
   "ampFirstPages": []

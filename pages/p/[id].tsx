@@ -6,6 +6,7 @@ import Router from "next/router";
 import { PostProps } from "../../components/Post";
 import axios from "axios";
 import { BiCameraMovie } from "react-icons/bi";
+import Cookies from "js-cookie";
 
 async function deletePost(id: number): Promise<void> {
   await axios.post(`http://localhost:3001/api/post/delete/${id}`);
@@ -31,19 +32,17 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   return {
     props: { post: "" },
   };
-  
 };
 
 type Props = {
   post: PostProps;
 };
-// // The Post component displays the details of a blog post.
 const Post: React.FC<Props> = (props) => {
   const { post } = props;
   const [user, setUser] = useState<{token: string, username: string, name: string, email: string}>()
   
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    const loggedUserJSON = Cookies.get("loggedNoteappUser");
     if (loggedUserJSON)
       setUser(JSON.parse(loggedUserJSON))
   }, [])

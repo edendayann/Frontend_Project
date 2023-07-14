@@ -3,6 +3,7 @@ import { GetServerSideProps } from "next";
 import Layout from "../components/Layout";
 import Post, { PostProps } from "../components/Post";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
   const username = query.username;
@@ -20,13 +21,12 @@ type Props = {
   count: number;
 };
 
-
 const Drafts: React.FC<Props> = (props) => {
   const {drafts, count} = props;
   const [user, setUser] = useState<{token: string, username: string, name: string, email: string, imageURL: string}>()
   
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    const loggedUserJSON = Cookies.get("loggedNoteappUser");
     if (loggedUserJSON)
       setUser(JSON.parse(loggedUserJSON))
   }, [])

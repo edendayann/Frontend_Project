@@ -3,6 +3,7 @@ import Layout from "../components/Layout";
 import Router from "next/router";
 import axios from 'axios';
 import { BarLoader } from 'react-spinners';
+import Cookies from 'js-cookie';
 
 const NewUser: React.FC = () => {
   const [fullname, setFullname] = useState("");
@@ -16,15 +17,6 @@ const NewUser: React.FC = () => {
 
   const imageInput = useRef<HTMLInputElement>(null);
 
-//  useEffect(() => {
-//   const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
-//   if (loggedUserJSON) {
-//     const user = JSON.parse(loggedUserJSON)
-//     setUser(user)
-//     //console.log("user is logged in:  " +user.name)
-//     //setToken(user.token)
-//   }
-// }, [])
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -48,7 +40,6 @@ const NewUser: React.FC = () => {
         .catch(error => console.log(error)) 
       userData.append('imageURL', url);
     }
-    //ZOHAR
     try{
       await axios.post('http://localhost:3001/api/signUp', userData, {
           headers: {
@@ -56,8 +47,7 @@ const NewUser: React.FC = () => {
           },
       })
       const user = (await axios.post('http://localhost:3001/api/login',{username, password})).data
-      //setToken(user.token)
-      window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user)) 
+      Cookies.set('loggedNoteappUser', JSON.stringify(user)); // Store user data in a cookie
       setLoading(false)
       await Router.push("/");
     }

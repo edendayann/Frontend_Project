@@ -3,6 +3,7 @@ import Router from "next/router";
 import { useState, useEffect, CSSProperties } from 'react'
 import Layout from '../components/Layout';
 import { BarLoader } from 'react-spinners';
+import Cookies from 'js-cookie';
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,7 @@ const App = () => {
   }
   
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    const loggedUserJSON = Cookies.get('loggedNoteappUser');
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
@@ -32,7 +33,7 @@ const App = () => {
     try {
       const user = (await axios.post('http://localhost:3001/api/login',{username, password})).data
       setToken(user.token)
-      window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user)) 
+      Cookies.set('loggedNoteappUser', JSON.stringify(user)); // Store user data in a cookie
       //TODO: check if needed
       setUser(user)
       setUsername('')
