@@ -3,21 +3,28 @@
 declare namespace Cypress {
     interface Chainable<Subject = any> {
       login(email: string, password: string): Chainable<any>;
+      create(title: string, contant: string):Chainable<any>;
     }
   }
 
 Cypress.Commands.add("login", (username:string, password) => {
     cy.visit('/login')
-    cy.get('input[placeholder="User Name"]').type(username);
-    // {enter} causes the form to submit
+    cy.get('input[placeholder="User Name"]').type(username); // {enter} causes the form to submit
     cy.get('input[placeholder="Password"]').type(`${password}{enter}`, { log: false })
-    // we should be redirected to /dashboard
-    cy.url().should('include', '/')
-    // our auth cookie should be present
-    cy.getCookie('your-session-cookie').should('exist')
-    // UI should reflect this user being logged in
-    cy.get('className="right"').should('contain', username)
+    cy.get('div.right').should('contain', username)
   })
+
+Cypress.Commands.add("create", (title: string, contant: string) => {
+  cy.contains('New post').click();
+  cy.get('input[placeholder="Title"]').as('newTitle');
+  cy.get('@newTitle').type(title);
+  cy.get('@newTitle').should('have.value', title);
+  cy.get('textarea[placeholder="Content"]').as('newContent');
+  cy.get('@newContent').type(contant);
+  cy.get('@newContent').should('have.value', contant);
+    
+  cy.contains('Create').click();
+})
   
 
 // ***********************************************

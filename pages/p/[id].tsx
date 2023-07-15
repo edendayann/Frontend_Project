@@ -47,7 +47,7 @@ const Post: React.FC<Props> = (props) => {
       setUser(JSON.parse(loggedUserJSON))
   }, [])
 
-  const postBelongsToUser = user?.token == post.author?.token
+  const postBelongsToUser = user?.email == post.author?.email
   // Append "(Draft)" to the title if the post is not published
   let title = post.title;
   if (!post.published) {

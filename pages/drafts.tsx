@@ -11,7 +11,6 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     res.statusCode = 403;
     return { props: { drafts: [], count: 0 } };
   }
-
   const response = await axios.post(`http://localhost:3001/api/posts`,{published: false, username});
   return { props: { drafts: response.data.posts, count: response.data.count} };
 };
@@ -48,14 +47,14 @@ const Drafts: React.FC<Props> = (props) => {
           {count == 0 ? 
           <b><center>No drafts available!</center></b>
           : drafts.map((post) => {
-            if(user.token == post.author?.token)
+            if(user.email == post.author?.email)
               return (
                 <div key={post.id} className="post">
                   <Post post={post}  video={post.video}  />
                 </div>
               )
-          }
-            )}
+            }
+          )}
         </main>
       </div>
       <style jsx>{`

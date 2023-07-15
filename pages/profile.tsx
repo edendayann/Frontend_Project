@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Layout from "../components/Layout";
 import axios from "axios";
-import { userAgent } from "next/server";
 import Cookies from "js-cookie";
 
 const Profile: React.FC = () => {
@@ -74,14 +72,14 @@ const Profile: React.FC = () => {
         <h2>Welcome {user.name}!</h2>
         <h3>Username: {user.username}</h3>
         <h3>Email: {user.email}</h3>
-        {user.imageURL === "" ? "no image" : <img src={user.imageURL} alt="cannot to load photo" className="image"></img>}
+        {user.imageURL === "" ? "" : <img src={user.imageURL} alt="" className="image"></img>}
       </div>
       <div>
           {user.imageURL != "" ? 
             <button
                 onClick={handleReset}
               >
-                Reset Image
+                Add or Reset Image
             </button> :
             <div> 
               <label>Add profile image: </label>
