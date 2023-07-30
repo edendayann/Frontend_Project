@@ -33,6 +33,7 @@ const App = () => {
     try {
       const user = (await axios.post('http://localhost:3001/api/login',{username, password})).data
       setToken(user.token)
+      console.log(user)
       Cookies.set('loggedNoteappUser', JSON.stringify(user)); // Store user data in a cookie
       //TODO: check if needed
       setUser(user)

@@ -7,8 +7,6 @@ require('dotenv').config();
 const cors = require('cors');
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-// const autoIncrement = require('mongoose-auto-increment');
-// autoIncrement.initialize(mongoose.connection);
 
 const app = express();
 app.use(cors());
@@ -141,7 +139,6 @@ app.post('/api/uploadMetaData',upload.none(), async (req, res) => {
         content: req.body.content,
         author: user.id,
         date: req.body.date,
-        //id: req.body.postID,
         video: req.body.videoURL,
     })
 
@@ -315,6 +312,7 @@ app.post('/api/login',upload.none(), async (req, res) => {
         return res.status(401).json({error: 'incorrect credentials'});
     try{
         await User.updateOne({ username: username },{ $set: { token: token }});
+        res.setHeader("Set-Cookie", `token=${token}; Path=/;   Max-Age=600`);     //new
         res.status(200).send({ token, username: user.username, name: user.name, email: user.email, imageURL: user.imageURL })
     }
     catch{
