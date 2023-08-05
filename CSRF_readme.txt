@@ -2,8 +2,7 @@ vulnerable site attack steps:
 1. OPEN inspect
 2. LOGIN: for example - byle 03061997
 3. COPY token from console
-    (OR from: F12 -> Application -> local storage -> http://localhost:3000 -> KEY: loggedNoteappUser)
-4. OPEN cmd
+    (OR from: F12 -> Network -> find the login request -> Preview -> token)
 5. PASTE the command and COMPLETE the missing parts:
     curl -X POST -H "Authorization: Bearer {YOUR_TOKEN}" -F "username={YOUR_USERNAME}" -F "title=ATTACK" -F "content=you are under attack" -F "video=" -F "date=2023-07-29" http://localhost:3001/api/uploadMetaData
     *for example:* 
